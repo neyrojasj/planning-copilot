@@ -49,45 +49,14 @@ Every plan must go through `pending_review` state before any code is written.
 
 ---
 
-## General Programming Standards
+## Standards (If Installed)
 
-**If standards are installed**, always read and apply `.copilot/standards/general.md` which contains critical programming guidelines.
+When `.copilot/standards/` folder exists, **always read and apply** the relevant standards files before generating or reviewing code:
 
-### 🚫 FORBIDDEN Practices (Always Enforce)
+| File | When to Apply |
+|------|---------------|
+| `general.md` | **Always** - Core principles for all languages |
+| `rust.md` | When working with Rust code |
+| `nodejs.md` | When working with Node.js/TypeScript code |
 
-#### 1. No Default Values for Environment Variables
-```
-❌ FORBIDDEN: process.env.PORT || 3000
-❌ FORBIDDEN: std::env::var("PORT").unwrap_or("3000")
-✅ REQUIRED: Fail if env var is not defined
-```
-Missing configuration must cause startup/compile failure, not silent fallback.
-
-#### 2. No Silent Error Swallowing
-```
-❌ FORBIDDEN: catch (e) { } // empty catch
-❌ FORBIDDEN: if let Ok(v) = result { } // ignoring Err
-✅ REQUIRED: Handle, propagate, or log with context
-```
-
-#### 3. No Catch-All Defaults in Pattern Matching
-```
-❌ FORBIDDEN: _ => "default" // when all cases are known
-❌ FORBIDDEN: default: return "other" // hiding known cases
-✅ REQUIRED: Exhaustively match all known variants
-```
-Adding a new enum variant must trigger a compile error, not silent default handling.
-
-#### 4. No Unsafe Unwrapping Without Justification
-```
-❌ FORBIDDEN: .unwrap() without explanation
-❌ FORBIDDEN: value! (force unwrap)
-✅ REQUIRED: .expect("reason") or explicit error handling
-```
-
-### Core Principle: Fail Fast, Fail Loud
-
-When generating or reviewing code, always ask:
-> *"If something goes wrong here, will I know about it immediately?"*
-
-If the answer is **no**, the code needs to be more explicit.
+The standards contain critical guidelines that must be followed. Read them on first interaction with a project.

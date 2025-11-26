@@ -2,6 +2,143 @@
 
 This document contains best practices for Rust development that should be followed when creating or reviewing plans.
 
+> **📌 Important**: This document includes both **General Programming Standards** (applicable to all languages) and **Rust-specific guidelines**. The general standards take priority.
+
+---
+
+## General Programming Standards (Rust-Specific)
+
+These are the core principles from `general.md` applied specifically to Rust.
+
+### 🚫 FORBIDDEN: Default Values for Environment Variables
+
+**Never provide default values for environment variables.**
+
+```rust
+// ❌ FORBIDDEN - Silent fallback
+let port = std::env::var("PORT").unwrap_or("3000".to_string());
+let host = std::env::var("HOST").unwrap_or_else(|_| "localhost".to_string());
+
+// ✅ REQUIRED - Fail if not defined
+let port = std::env::var("PORT")
+    .expect("PORT environment variable must be set");
+
+// ✅ REQUIRED - With anyhow context
+let port = std::env::var("PORT")
+    .context("PORT environment variable must be set")?;
+
+// ✅ REQUIRED - At startup with validation
+fn load_config() -> Result<Config> {
+    Ok(Config {
+        port: std::env::var("PORT")
+            .context("PORT must be set")?,
+        database_url: std::env::var("DATABASE_URL")
+            .context("DATABASE_URL must be set")?,
+    })
+}
+```
+
+### 🚫 FORBIDDEN: Silent Error Swallowing
+
+**Never ignore error cases. Every `Result` and `Option` must be handled.**
+
+```rust
+// ❌ FORBIDDEN - Ignoring the Err case
+if let Ok(value) = some_operation() {
+    // Using value, but Err is silently ignored!
+}
+
+// ❌ FORBIDDEN - Silent unwrap in non-critical path
+let _ = file.write_all(data);
+
+// ✅ REQUIRED - Handle or propagate
+let value = some_operation()
+    .map_err(|e| anyhow::anyhow!("Operation failed: {}", e))?;
+
+// ✅ REQUIRED - Log if truly optional
+if let Err(e) = optional_operation() {
+    tracing::warn!("Optional operation failed: {}", e);
+}
+
+// ✅ REQUIRED - Explicit ignore with reason
+let _ = tx.send(msg); // Channel may be closed, receiver handles this
+```
+
+### 🚫 FORBIDDEN: Catch-All Defaults in Pattern Matching
+
+**Never use `_` to hide known enum variants.**
+
+```rust
+// ❌ FORBIDDEN - Wildcard hiding known cases
+enum Status {
+    Active,
+    Inactive,
+    Pending,
+    Suspended,  // New variant won't cause compile error!
+}
+
+fn handle(status: Status) -> &'static str {
+    match status {
+        Status::Active => "active",
+        Status::Inactive => "inactive",
+        _ => "other",  // FORBIDDEN: Hiding Pending and future variants
+    }
+}
+
+// ✅ REQUIRED - Exhaustive matching
+fn handle(status: Status) -> &'static str {
+    match status {
+        Status::Active => "active",
+        Status::Inactive => "inactive",
+        Status::Pending => "pending",
+        Status::Suspended => "suspended",
+        // Compiler will error if new variant is added!
+    }
+}
+
+// ✅ ACCEPTABLE - Only for truly external/unknown data
+fn parse_external(s: &str) -> Status {
+    match s {
+        "active" => Status::Active,
+        "inactive" => Status::Inactive,
+        "pending" => Status::Pending,
+        "suspended" => Status::Suspended,
+        unknown => {
+            tracing::warn!("Unknown status from API: {}", unknown);
+            Status::Pending  // Explicit fallback with logging
+        }
+    }
+}
+```
+
+### 🚫 FORBIDDEN: Unsafe Unwrapping Without Justification
+
+**Never use `.unwrap()` without a clear reason. Use `.expect()` with context.**
+
+```rust
+// ❌ FORBIDDEN - No explanation
+let value = option.unwrap();
+let result = operation().unwrap();
+
+// ❌ FORBIDDEN - In library code (should return Result)
+pub fn get_user(id: &str) -> User {
+    self.users.get(id).unwrap().clone()
+}
+
+// ✅ REQUIRED - With explanation
+let value = option.expect("Value guaranteed after validation");
+
+// ✅ REQUIRED - Compile-time guarantees
+let regex = Regex::new(r"^\d+$").expect("Static regex is valid");
+
+// ✅ REQUIRED - Return Result in public APIs
+pub fn get_user(&self, id: &str) -> Result<User> {
+    self.users.get(id)
+        .cloned()
+        .ok_or_else(|| anyhow::anyhow!("User not found: {}", id))
+}
+```
+
 ---
 
 ## Project Structure
@@ -376,6 +513,13 @@ jobs:
 
 When reviewing or creating Rust code:
 
+### General Standards (MUST)
+- [ ] **No default env vars** - All env vars fail if undefined
+- [ ] **No silent errors** - All `Result`/`Option` handled or propagated
+- [ ] **No catch-all patterns** - Exhaustive matching on known enums
+- [ ] **No bare `.unwrap()`** - Use `.expect("reason")` or handle properly
+
+### Rust-Specific Standards
 - [ ] Follows naming conventions
 - [ ] Proper error handling (no unwrap in library code)
 - [ ] Documentation on public items

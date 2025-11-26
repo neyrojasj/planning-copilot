@@ -2,6 +2,171 @@
 
 This document contains best practices for Node.js/TypeScript development that should be followed when creating or reviewing plans.
 
+> **📌 Important**: This document includes both **General Programming Standards** (applicable to all languages) and **Node.js/TypeScript-specific guidelines**. The general standards take priority.
+
+---
+
+## General Programming Standards (Node.js/TypeScript-Specific)
+
+These are the core principles from `general.md` applied specifically to Node.js/TypeScript.
+
+### 🚫 FORBIDDEN: Default Values for Environment Variables
+
+**Never provide default values for required environment variables.**
+
+```typescript
+// ❌ FORBIDDEN - Silent fallback with ||
+const port = process.env.PORT || 3000;
+const apiKey = process.env.API_KEY || "default-key";
+
+// ❌ FORBIDDEN - Silent fallback with ??
+const databaseUrl = process.env.DATABASE_URL ?? "localhost";
+
+// ✅ REQUIRED - Fail if not defined
+const port = process.env.PORT;
+if (!port) {
+  throw new Error("PORT environment variable must be set");
+}
+
+// ✅ REQUIRED - Validation with Zod (recommended)
+import { z } from 'zod';
+
+const envSchema = z.object({
+  PORT: z.string().min(1, "PORT is required"),
+  DATABASE_URL: z.string().url("DATABASE_URL must be a valid URL"),
+  API_KEY: z.string().min(1, "API_KEY is required"),
+  NODE_ENV: z.enum(['development', 'production', 'test']),
+});
+
+export const env = envSchema.parse(process.env);
+
+// ✅ ACCEPTABLE - Only for truly optional features
+const enableDebug = process.env.DEBUG === "true"; // Boolean flag, defaults to false
+```
+
+### 🚫 FORBIDDEN: Silent Error Swallowing
+
+**Never catch errors without handling them properly.**
+
+```typescript
+// ❌ FORBIDDEN - Empty catch block
+try {
+  await riskyOperation();
+} catch (e) {
+  // Error silently swallowed!
+}
+
+// ❌ FORBIDDEN - Catch and ignore
+try {
+  await saveToDatabase(data);
+} catch {
+  // "It's fine, we'll try again later" - NO!
+}
+
+// ❌ FORBIDDEN - .catch() with no handler
+fetchData().catch(() => {});
+
+// ✅ REQUIRED - Handle, log, and/or rethrow
+try {
+  await riskyOperation();
+} catch (error) {
+  logger.error("Risky operation failed", { 
+    error: error instanceof Error ? error.message : error,
+    stack: error instanceof Error ? error.stack : undefined,
+    context: { userId, operationId }
+  });
+  throw new OperationError("Risky operation failed", { cause: error });
+}
+
+// ✅ REQUIRED - Proper Promise error handling
+fetchData()
+  .catch((error) => {
+    logger.error("Failed to fetch data", { error });
+    throw error; // Re-throw or handle appropriately
+  });
+```
+
+### 🚫 FORBIDDEN: Catch-All Defaults in Switch/Conditionals
+
+**Never use default cases to hide known type variants.**
+
+```typescript
+// ❌ FORBIDDEN - Default hiding known cases
+type Status = "active" | "inactive" | "pending" | "suspended";
+
+function getStatusLabel(status: Status): string {
+  switch (status) {
+    case "active":
+      return "Active";
+    case "inactive":
+      return "Inactive";
+    default:
+      return "Unknown"; // FORBIDDEN: Hides pending and suspended!
+  }
+}
+
+// ✅ REQUIRED - Exhaustive type checking
+function getStatusLabel(status: Status): string {
+  switch (status) {
+    case "active":
+      return "Active";
+    case "inactive":
+      return "Inactive";
+    case "pending":
+      return "Pending";
+    case "suspended":
+      return "Suspended";
+    default:
+      // Exhaustive check - TypeScript will error if case is missing
+      const _exhaustive: never = status;
+      throw new Error(`Unhandled status: ${status}`);
+  }
+}
+
+// ✅ REQUIRED - Object map pattern (also exhaustive)
+const STATUS_LABELS: Record<Status, string> = {
+  active: "Active",
+  inactive: "Inactive",
+  pending: "Pending",
+  suspended: "Suspended",
+}; // TypeScript errors if a key is missing
+
+function getStatusLabel(status: Status): string {
+  return STATUS_LABELS[status];
+}
+```
+
+### 🚫 FORBIDDEN: Unsafe Non-Null Assertions
+
+**Never use `!` (non-null assertion) without justification.**
+
+```typescript
+// ❌ FORBIDDEN - Blind assertion
+const element = document.getElementById("app")!;
+const user = users.find(u => u.id === id)!;
+
+// ❌ FORBIDDEN - Optional chaining then assertion
+const name = data?.user?.name!;
+
+// ✅ REQUIRED - Explicit null check
+const element = document.getElementById("app");
+if (!element) {
+  throw new Error("App element not found - check if DOM is loaded");
+}
+
+// ✅ REQUIRED - Guard clause
+const user = users.find(u => u.id === id);
+if (!user) {
+  throw new NotFoundError(`User with id ${id} not found`);
+}
+
+// ✅ REQUIRED - With optional chaining and fallback handling
+const name = data?.user?.name;
+if (name === undefined) {
+  throw new ValidationError("User name is required");
+}
+```
+
 ---
 
 ## Project Structure
@@ -508,6 +673,13 @@ jobs:
 
 When reviewing or creating Node.js/TypeScript code:
 
+### General Standards (MUST)
+- [ ] **No default env vars** - Use Zod validation, fail if undefined
+- [ ] **No silent errors** - All catch blocks handle/log/rethrow
+- [ ] **No catch-all switch** - Use exhaustive checks with `never`
+- [ ] **No unsafe `!` assertions** - Explicit null checks required
+
+### Node.js/TypeScript-Specific Standards
 - [ ] TypeScript strict mode enabled
 - [ ] No `any` types (use `unknown` if needed)
 - [ ] Proper error handling with custom errors
@@ -517,4 +689,4 @@ When reviewing or creating Node.js/TypeScript code:
 - [ ] Formatted with Prettier
 - [ ] Dependencies audited
 - [ ] Sensitive data not logged
-- [ ] Environment variables validated
+- [ ] Environment variables validated with schema
