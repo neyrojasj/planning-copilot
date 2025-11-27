@@ -1,0 +1,22 @@
+# Planning Copilot - Memory State File
+# This file indexes all saved memories for quick lookup
+# The agent checks this file FIRST before searching the codebase
+
+version: 1
+last_updated: ""
+
+# Saved memories
+# Format:
+#   MEM-XXX:
+#     title: "Brief title"
+#     description: "Short description of what this memory contains"
+#     file: "filename.md"
+#     tags: ["tag1", "tag2"]
+#     created: "YYYY-MM-DD"
+#     updated: "YYYY-MM-DD"
+memories: {}
+
+# Quick lookup by tags
+# Format:
+#   tag_name: ["MEM-001", "MEM-002"]
+tags_index: {}

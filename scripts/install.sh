@@ -73,6 +73,7 @@ create_directory_structure() {
     
     # Create .copilot directory structure
     mkdir -p "$COPILOT_DIR/plans"
+    mkdir -p "$COPILOT_DIR/memory"
     mkdir -p "$COPILOT_DIR/tmp"
     
     if [ "$INSTALL_STANDARDS" = true ]; then
@@ -132,6 +133,26 @@ summary:
 EOF
     
     print_success "state.yaml initialized"
+}
+
+create_memory_state_yaml() {
+    print_info "Initializing memory/state.yaml..."
+    
+    cat > "$COPILOT_DIR/memory/state.yaml" << EOF
+# Planning Copilot - Memory State File
+# This file indexes all saved memories for quick lookup
+
+version: 1
+last_updated: "$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+
+# Saved memories
+memories: {}
+
+# Quick lookup by tags
+tags_index: {}
+EOF
+    
+    print_success "memory/state.yaml initialized"
 }
 
 install_planning_agent() {
@@ -281,6 +302,15 @@ When a user makes a request, first evaluate its complexity:
 
 **On every execution, perform these checks:**
 
+### Step 0: Check Memory (FIRST!)
+```
+ALWAYS read .copilot/memory/state.yaml FIRST if it exists
+  - This is your PRIMARY source of information
+  - Contains saved context, decisions, and important findings
+  - Check here BEFORE searching the codebase or asking questions
+  - Use saved memories to provide consistent, informed responses
+```
+
 ### Step 1: Check Project Summary
 ```
 IF .copilot/project_summary.md does NOT exist:
@@ -320,6 +350,9 @@ The agent uses the following structure in the target project:
 ├── standards/             # Language-specific best practices (optional)
 │   ├── rust.md
 │   └── nodejs.md
+├── memory/                # Persistent memory storage
+│   ├── state.yaml         # Index of all saved memories
+│   └── *.md               # Individual memory files
 ├── plans/
 │   ├── state.yaml         # Tracks all plans and their status
 │   ├── PLAN-001.md        # Individual plan files
@@ -693,6 +726,7 @@ main() {
     create_directory_structure
     create_gitignore
     create_state_yaml
+    create_memory_state_yaml
     install_planning_agent
     install_copilot_instructions
     create_instructions_template
@@ -709,6 +743,7 @@ main() {
     echo "The following has been installed:"
     echo "  • Planning agent:       .github/agents/planning.agent.md"
     echo "  • Copilot instructions: .github/copilot-instructions.md"
+    echo "  • Memory system:        .copilot/memory/"
     echo "  • Copilot folder:       .copilot/"
     echo "  • Plans tracker:        .copilot/plans/state.yaml"
     

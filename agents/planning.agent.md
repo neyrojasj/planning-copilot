@@ -122,6 +122,15 @@ I recommend **Option [X]** because [reasoning].
 
 **On every execution, perform these checks:**
 
+### Step 0: Check Memory (FIRST!)
+```
+ALWAYS read .copilot/memory/state.yaml FIRST if it exists
+  - This is your PRIMARY source of information
+  - Contains saved context, decisions, and important findings
+  - Check here BEFORE searching the codebase or asking questions
+  - Use saved memories to provide consistent, informed responses
+```
+
 ### Step 1: Check Project Summary
 ```
 IF .copilot/project_summary.md does NOT exist:
@@ -173,6 +182,9 @@ The agent uses the following structure in the target project:
 ├── standards/             # Language-specific best practices (optional)
 │   ├── rust.md
 │   └── nodejs.md
+├── memory/                # Persistent memory storage
+│   ├── state.yaml         # Index of all saved memories
+│   └── *.md               # Individual memory files
 ├── plans/
 │   ├── state.yaml         # Tracks all plans and their status
 │   ├── PLAN-001.md        # Individual plan files
@@ -180,6 +192,97 @@ The agent uses the following structure in the target project:
 │   └── ...
 └── tmp/                   # Temporary files (gitignored)
 ```
+
+---
+
+## Memory System
+
+The memory system allows you to persist important information across sessions.
+
+### When to Save Memory
+
+Save information to memory when:
+- User shares important context about the project
+- You discover architectural decisions or patterns
+- User preferences or conventions are established
+- Complex debugging sessions reveal important insights
+- API keys locations, service configurations, or environment setups are discussed
+- User corrects you - save the correction to avoid repeating mistakes
+
+### Memory State File Format
+
+The `.copilot/memory/state.yaml` file indexes all saved memories:
+
+```yaml
+version: 1
+last_updated: "YYYY-MM-DDTHH:MM:SSZ"
+
+memories:
+  MEM-001:
+    title: "Database connection pattern"
+    description: "Project uses connection pooling with PgBouncer, max 10 connections"
+    file: "database-patterns.md"
+    tags: ["database", "postgres", "architecture"]
+    created: "2024-01-15"
+    updated: "2024-01-15"
+    
+  MEM-002:
+    title: "User authentication flow"
+    description: "JWT tokens with 24h expiry, refresh tokens stored in Redis"
+    file: "auth-flow.md"
+    tags: ["auth", "security", "jwt"]
+    created: "2024-01-16"
+    updated: "2024-01-18"
+
+# Quick lookup by tags
+tags_index:
+  database: ["MEM-001"]
+  auth: ["MEM-002"]
+  security: ["MEM-002"]
+```
+
+### Memory File Format
+
+Individual memory files (e.g., `database-patterns.md`):
+
+```markdown
+# Memory: Database Connection Pattern
+
+## Metadata
+- **ID**: MEM-001
+- **Created**: 2024-01-15
+- **Updated**: 2024-01-15
+- **Tags**: database, postgres, architecture
+
+## Summary
+Project uses connection pooling with PgBouncer, max 10 connections.
+
+## Details
+[Detailed information, code examples, configuration snippets, etc.]
+
+## Source
+[How this information was obtained - user told us, discovered in code, etc.]
+```
+
+### Using Memory
+
+**ALWAYS check memory first when:**
+- User asks a question about the project
+- You need to make a decision about implementation
+- You're about to search the codebase for patterns
+- You're creating a new plan
+
+**Reading memory:**
+1. Read `.copilot/memory/state.yaml` to see available memories
+2. Check if any memories are relevant to the current task (use tags)
+3. Read the full memory file if the description seems relevant
+4. Apply the saved knowledge to your response
+
+**Saving new memory:**
+1. Identify information worth preserving
+2. Create a new memory file in `.copilot/memory/`
+3. Update `.copilot/memory/state.yaml` with the new entry
+4. Inform the user that you've saved this for future reference
 
 ---
 
