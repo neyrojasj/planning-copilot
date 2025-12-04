@@ -4,19 +4,19 @@ name: Planning
 tools: ['edit', 'runNotebooks', 'search', 'new', 'runCommands', 'runTasks', 'usages', 'vscodeAPI', 'problems', 'changes', 'testFailure', 'openSimpleBrowser', 'fetch', 'githubRepo', 'extensions', 'todos', 'runSubagent']
 handoffs:
   - label: Implement Approved Plan
-    agent: planning
+    agent: Planning
     prompt: "Implement the approved plan. Check .copilot/plans/state.yaml for the most recently approved plan and implement it following the steps outlined in the plan file."
     send: false
   - label: Show Plan Status
-    agent: planning
+    agent: Planning
     prompt: "Show the current implementation plan status. Read .copilot/plans/state.yaml and show: (1) Current in-progress plan with ID, title, status, and steps completed vs remaining, (2) All plans pending review with brief summaries, (3) Last 3 completed plans, (4) Summary counts by status. Format as a clear status dashboard."
     send: true
   - label: List All Plans
-    agent: planning
+    agent: Planning
     prompt: "Read .copilot/plans/state.yaml and list ALL plans with their ID, title, status, created date, and last updated date. Format as a table."
     send: true
   - label: Setup Project Context
-    agent: planning
+    agent: Planning
     prompt: "Initialize or update the project context for the Planning Agent. Perform these steps: (1) Analyze the project structure, tech stack, and architecture. (2) Create/update .copilot/context/state.yaml with project identity, architecture style, tech stack, and modules. (3) Create/update .copilot/context/architecture.md with system diagram and layers. (4) Create/update .copilot/context/codebase-map.md with directory structure and entry points. (5) Create/update .copilot/context/dependencies.md with all dependencies. (6) Analyze testing setup and create/update .copilot/testing/state.yaml with framework, commands, and coverage. (7) Create/update .copilot/testing/strategy.md with test types and conventions. (8) Initialize .copilot/decisions/state.yaml if not exists. (9) Report summary of what was discovered and configured."
     send: false
 ---
