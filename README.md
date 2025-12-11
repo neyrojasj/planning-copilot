@@ -1,8 +1,8 @@
 <div align="center">
 
-# 🤖 Planning Copilot
+# 🤖 Smart Copilot
 
-### *Thoughtful AI-Assisted Development with Human Control*
+### *Docs-First AI-Assisted Development with Human Control*
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![GitHub](https://img.shields.io/badge/GitHub-Repository-blue?logo=github)](https://github.com/neyrojasj/planning-copilot)
@@ -10,8 +10,8 @@
 [![Rust](https://img.shields.io/badge/Rust-Standards-orange?logo=rust)](standards/rust.md)
 [![Node.js](https://img.shields.io/badge/Node.js-Standards-green?logo=node.js)](standards/nodejs.md)
 
-**A structured planning agent for GitHub Copilot that brings intentionality to AI-assisted development.**  
-*Plan first. Approve consciously. Implement with confidence.*
+**A docs-first smart agent for GitHub Copilot that brings intentionality to AI-assisted development.**  
+*Load index. Read docs. Plan first. Approve consciously. Implement with confidence. Update docs.*
 
 [Quick Start](#-quick-start) • [Features](#-features) • [How It Works](#-how-it-works) • [Documentation](#-commands)
 
@@ -25,8 +25,8 @@
 <tr>
 <td width="33%" valign="top">
 
-### 🎯 Structured Planning
-Never let AI implement changes without your explicit approval. Every code change starts with a plan you review and approve.
+### 🔍 Docs-First Approach
+Every execution starts by loading the search index. Navigate instantly to relevant documentation using keywords.
 
 </td>
 <td width="33%" valign="top">
@@ -45,14 +45,14 @@ Built-in language standards for Rust and Node.js. Extensible for any language or
 <tr>
 <td width="33%" valign="top">
 
-### 🔍 Project Analysis
-Automatically understands your project structure, coding standards, and existing configurations on first run.
+### 📚 Search Index
+`index.yaml` serves as your navigation map—project identity, doc summaries, keywords, and cross-references.
 
 </td>
 <td width="33%" valign="top">
 
-### 📁 Organized Storage
-Clean separation: all plans in `.copilot/plans/`, tracked via YAML state management.
+### 📁 Organized Docs
+Single source of truth in `.copilot/docs/`. No duplication across files.
 
 </td>
 <td width="33%" valign="top">
@@ -113,34 +113,33 @@ curl -sSL https://raw.githubusercontent.com/neyrojasj/planning-copilot/main/scri
 ```
 your-project/
 ├── .github/
-│   ├── copilot-instructions.md  # 🤖 Auto-loads planning agent
+│   ├── copilot-instructions.md  # 🤖 Auto-loads smart agent
 │   └── agents/
-│       └── planning.agent.md    # 🧠 The planning agent core
+│       └── smart.agent.md       # 🧠 The smart agent core
 └── .copilot/
     ├── .gitignore               # 🔒 Keeps plans local
     ├── instructions.md          # 📝 Project-specific rules
-    ├── project_summary.md       # 📊 Auto-generated analysis
+    ├── docs/                    # 📚 Documentation (single source of truth)
+    │   ├── index.yaml           # 🔍 Search index (load first!)
+    │   ├── overview.md          # Project overview
+    │   ├── architecture.md      # System architecture
+    │   ├── tech-stack.md        # Languages, frameworks, deps
+    │   ├── api.md               # API documentation
+    │   ├── testing.md           # Testing strategy
+    │   ├── development.md       # Dev workflow
+    │   ├── conventions.md       # Code conventions
+    │   └── decisions/           # 📐 Design decisions (ADRs)
+    │       ├── index.yaml       # Decision index
+    │       └── ADR-XXX.md       # Individual decisions
     ├── standards/               # 🛡️ Best practices (optional)
     │   ├── general.md           # Universal principles
     │   ├── rust.md              # Rust standards
     │   └── nodejs.md            # Node.js standards
-    ├── decisions/               # 📐 Design decisions
-    │   ├── state.yaml           # Decision index
-    │   └── DEC-XXX.md           # Individual decisions
-    ├── testing/                 # 🧪 Testing context
-    │   ├── state.yaml           # Testing configuration
-    │   └── strategy.md          # Testing strategy
-    ├── context/                 # 🗺️ Project context
-    │   ├── state.yaml           # Context state
-    │   ├── architecture.md      # System architecture
-    │   ├── codebase-map.md      # Navigation guide
-    │   └── dependencies.md      # Dependencies analysis
-    ├── memory/                  # 🧠 Persistent memory
-    │   ├── state.yaml           # Memory index
-    │   └── *.md                 # Individual memories
     ├── plans/
     │   ├── state.yaml           # 📈 Plan tracking
     │   └── PLAN-XXX.md          # 📋 Individual plans
+    ├── prompts/                 # 🎯 Setup prompts
+    │   └── setup-project.md     # Project setup prompt
     └── tmp/                     # 🗑️ Temporary files
 ```
 
@@ -148,13 +147,13 @@ your-project/
 
 ## 🧠 How It Works
 
-### 🎬 Auto-Loading Intelligence
+### 🎬 Docs-First Intelligence
 
-The `copilot-instructions.md` ensures the Planning Agent is **automatically loaded** by default—guaranteeing every code change flows through the intentional planning workflow.
+The `copilot-instructions.md` ensures the Smart Agent is **automatically loaded** by default. Every execution starts with loading `index.yaml`—your navigation map to project documentation.
 
 ### 🏁 First Run Initialization
 
-When you first invoke the planning agent, it performs these steps:
+When you first invoke the smart agent, it performs these steps:
 
 <div align="center">
 
@@ -162,15 +161,15 @@ When you first invoke the planning agent, it performs these steps:
 <tr>
 <td width="10%" align="center">1️⃣</td>
 <td width="90%">
-<strong>Check for Project Summary</strong><br/>
-<sub>Verifies if <code>.copilot/project_summary.md</code> exists</sub>
+<strong>Load Search Index</strong><br/>
+<sub>Reads <code>.copilot/docs/index.yaml</code> for keywords and doc summaries</sub>
 </td>
 </tr>
 <tr>
 <td width="10%" align="center">2️⃣</td>
 <td width="90%">
-<strong>Analyze Project Structure</strong><br/>
-<sub>If summary doesn't exist, scans your codebase and generates insights</sub>
+<strong>Navigate to Relevant Docs</strong><br/>
+<sub>Uses keywords to find documentation matching the task</sub>
 </td>
 </tr>
 <tr>
@@ -183,8 +182,8 @@ When you first invoke the planning agent, it performs these steps:
 <tr>
 <td width="10%" align="center">4️⃣</td>
 <td width="90%">
-<strong>Scan GitHub Configuration</strong><br/>
-<sub>Discovers existing Copilot configurations in <code>.github/</code> folder</sub>
+<strong>Check Plan Status</strong><br/>
+<sub>Reviews <code>.copilot/plans/state.yaml</code> for pending work</sub>
 </td>
 </tr>
 <tr>
@@ -203,9 +202,9 @@ When you first invoke the planning agent, it performs these steps:
 ```mermaid
 %%{init: {'theme':'base', 'themeVariables': { 'primaryColor':'#4A90E2','primaryTextColor':'#fff','primaryBorderColor':'#2E5C8A','lineColor':'#6c757d','secondaryColor':'#50C878','tertiaryColor':'#E74C3C'}}}%%
 graph TD
-    A[💭 User Request] --> B[📝 Create Plan]
-    B --> C[📋 draft]
-    C --> D[✍️ Complete Plan]
+    A[💭 User Request] --> B[🔍 Load Index]
+    B --> C[📚 Read Docs]
+    C --> D[📝 Create Plan]
     D --> E[📊 pending_review]
     E --> F{👤 User Decision}
     F -->|✅ Approve| G[🎯 approved]
@@ -213,11 +212,12 @@ graph TD
     F -->|📝 Revise| D
     G --> I[⚙️ in_progress]
     I --> J[✅ completed]
-    J --> K[📦 archived]
+    J --> K[📖 Update Docs]
+    K --> L[📦 archived]
     
     style A fill:#4A90E2,stroke:#2E5C8A,stroke-width:3px,color:#fff
-    style B fill:#6c757d,stroke:#495057,stroke-width:2px,color:#fff
-    style C fill:#6c757d,stroke:#495057,stroke-width:2px,color:#fff
+    style B fill:#9B59B6,stroke:#7D3C98,stroke-width:2px,color:#fff
+    style C fill:#9B59B6,stroke:#7D3C98,stroke-width:2px,color:#fff
     style D fill:#6c757d,stroke:#495057,stroke-width:2px,color:#fff
     style E fill:#4A90E2,stroke:#2E5C8A,stroke-width:2px,color:#fff
     style F fill:#9B59B6,stroke:#7D3C98,stroke-width:3px,color:#fff
@@ -225,7 +225,8 @@ graph TD
     style H fill:#E74C3C,stroke:#C0392B,stroke-width:3px,color:#fff
     style I fill:#F39C12,stroke:#D68910,stroke-width:2px,color:#fff
     style J fill:#3498DB,stroke:#2874A6,stroke-width:3px,color:#fff
-    style K fill:#95A5A6,stroke:#707B7C,stroke-width:2px,color:#fff
+    style K fill:#50C878,stroke:#2E7D4E,stroke-width:2px,color:#fff
+    style L fill:#95A5A6,stroke:#707B7C,stroke-width:2px,color:#fff
     
     linkStyle default stroke:#6c757d,stroke-width:2px
 ```
@@ -272,7 +273,7 @@ The agent **NEVER** implements changes autonomously:
 
 ## 📚 Commands
 
-Interact with the `@planning` agent using these commands:
+Interact with the `@smart` agent using these commands:
 
 <table>
 <thead>
@@ -291,28 +292,20 @@ Interact with the `@planning` agent using these commands:
 <td>📋 Display all plans with their current statuses</td>
 </tr>
 <tr>
-<td><code>plan show &lt;ID&gt;</code></td>
-<td>🔍 View detailed information for a specific plan</td>
-</tr>
-<tr>
 <td><code>plan approve &lt;ID&gt;</code></td>
 <td>✅ Approve a plan and mark it ready for implementation</td>
-</tr>
-<tr>
-<td><code>plan reject &lt;ID&gt;</code></td>
-<td>❌ Reject a plan and prevent implementation</td>
 </tr>
 <tr>
 <td><code>plan implement &lt;ID&gt;</code></td>
 <td>⚙️ Begin implementing an approved plan</td>
 </tr>
 <tr>
-<td><code>plan archive &lt;ID&gt;</code></td>
-<td>📦 Archive a completed plan for future reference</td>
+<td><code>docs update</code></td>
+<td>📖 Update documentation after changes</td>
 </tr>
 <tr>
-<td><code>plan status</code></td>
-<td>📊 Show summary dashboard of all plans by status</td>
+<td><code>docs rebuild</code></td>
+<td>🔄 Rebuild the search index from all docs</td>
 </tr>
 </tbody>
 </table>
@@ -544,7 +537,7 @@ planning-copilot/
 ├── 📄 README.md                 # You are here
 ├── 📄 LICENSE                   # MIT License
 ├── agents/
-│   └── planning.agent.md        # 🧠 Main planning agent (YAML frontmatter)
+│   └── smart.agent.md           # 🧠 Main smart agent (YAML frontmatter)
 ├── standards/
 │   ├── general.md               # 🌍 Universal principles
 │   ├── rust.md                  # 🦀 Rust best practices
@@ -557,38 +550,41 @@ planning-copilot/
     ├── copilot-instructions.md  # 🤖 Default Copilot config
     ├── instructions-template.md # 📝 Instructions template
     ├── plan-template.md         # 📋 Plan file template
-    ├── project-summary-template.md  # 📊 Summary template
-    ├── state.yaml               # 🔄 State file template
-    ├── memory-state.yaml        # 🧠 Memory state template
-    ├── memory-template.md       # 🧠 Memory file template
-    ├── decisions/               # 📐 Decision templates
-    │   ├── state.yaml           # Decision index template
-    │   └── decision-template.md # Individual decision template
-    ├── testing/                 # 🧪 Testing templates
-    │   ├── state.yaml           # Testing state template
-    │   └── strategy.md          # Strategy documentation template
-    └── context/                 # 🗺️ Context templates
-        ├── state.yaml           # Context state template
-        ├── architecture.md      # Architecture doc template
-        ├── codebase-map.md      # Codebase map template
-        └── dependencies.md      # Dependencies template
+    ├── project-summary-template.md  # 📊 Quick reference template
+    ├── state.yaml               # 🔄 Plans state template
+    └── docs/                    # 📚 Documentation templates
+        ├── index.yaml           # 🔍 Search index template
+        ├── overview.md          # Project overview template
+        ├── architecture.md      # Architecture template
+        ├── tech-stack.md        # Tech stack template
+        ├── api.md               # API docs template
+        ├── testing.md           # Testing template
+        ├── development.md       # Development template
+        ├── conventions.md       # Conventions template
+        └── decisions/           # 📐 Decision templates
+            ├── index.yaml       # Decision index template
+            └── template.md      # ADR template
 ```
 
 ---
 
 ## 🤖 Agent Configuration
 
-The planning agent uses VS Code's custom agent format with **YAML frontmatter**:
+The smart agent uses VS Code's custom agent format with **YAML frontmatter**:
 
 ```yaml
 ---
-description: Plan, track, and implement code changes with explicit user approval.
-name: Planning
+description: Docs-first agent that plans, tracks, and implements code changes.
+name: Smart
 tools: ['fetch', 'githubRepo', 'search', 'usages']
 handoffs:
-  - label: Implement Approved Plan
+  - label: Setup Project
     agent: agent
-    prompt: "Implement the approved plan..."
+    prompt: "Initialize project documentation..."
+    send: false
+  - label: Rebuild Search Index
+    agent: agent
+    prompt: "Rebuild the search index..."
     send: false
 ---
 ```
@@ -599,8 +595,8 @@ Seamlessly transition between specialized agents:
 
 | From | To | Purpose |
 |------|-----|---------|
-| **Planning Agent** | Default Agent | Implement approved plans |
-| **Planning Agent** | Custom Agent | Specialized implementation (e.g., testing, docs) |
+| **Smart Agent** | Default Agent | Implement approved plans |
+| **Smart Agent** | Custom Agent | Specialized implementation |
 
 ---
 
@@ -644,11 +640,11 @@ We welcome contributions! Here's how to get started:
 
 ---
 
-## 🌟 Why Planning Copilot?
+## 🌟 Why Smart Copilot?
 
 <div align="center">
 
-> *"The best code is well-thought-out code. Planning Copilot ensures AI assistance enhances your decision-making rather than replacing it."*
+> *"The best code is well-documented code. Smart Copilot ensures AI assistance enhances your decision-making with docs-first approach rather than replacing it."*
 
 ### Made with ❤️ for developers who value intentionality in the AI era
 

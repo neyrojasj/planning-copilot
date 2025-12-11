@@ -1,7 +1,7 @@
 #!/bin/bash
 # =============================================================================
-# Planning Copilot Installer
-# Installs the planning agent and standards into your project
+# Smart Agent Installer
+# Installs the smart agent and documentation structure into your project
 # =============================================================================
 
 set -e
@@ -29,7 +29,7 @@ INSTALL_MINIMAL=false
 print_banner() {
     echo -e "${BLUE}"
     echo "╔═══════════════════════════════════════════════════════════════╗"
-    echo "║                  Planning Copilot Installer                   ║"
+    echo "║                    Smart Agent Installer                      ║"
     echo "╚═══════════════════════════════════════════════════════════════╝"
     echo -e "${NC}"
 }
@@ -62,7 +62,7 @@ show_help() {
     echo "Examples:"
     echo "  $0                      # Full installation with standards (default)"
     echo "  $0 --no-standards       # Install without standards"
-    echo "  $0 --minimal            # Install only the planning agent"
+    echo "  $0 --minimal            # Install only the smart agent"
 }
 
 # =============================================================================
@@ -73,11 +73,8 @@ create_directory_structure() {
     print_info "Creating directory structure..."
     
     # Create .copilot directory structure
+    mkdir -p "$COPILOT_DIR/docs/decisions"
     mkdir -p "$COPILOT_DIR/plans"
-    mkdir -p "$COPILOT_DIR/memory"
-    mkdir -p "$COPILOT_DIR/decisions"
-    mkdir -p "$COPILOT_DIR/testing"
-    mkdir -p "$COPILOT_DIR/context"
     mkdir -p "$COPILOT_DIR/prompts"
     mkdir -p "$COPILOT_DIR/tmp"
     
@@ -95,7 +92,7 @@ create_gitignore() {
     print_info "Creating .copilot/.gitignore..."
     
     cat > "$COPILOT_DIR/.gitignore" << 'EOF'
-# Planning Copilot - Gitignore
+# Smart Agent - Gitignore
 # These files are local and should not be committed
 
 # Temporary files
@@ -106,9 +103,6 @@ plans/
 
 # Project summary (auto-generated)
 project_summary.md
-
-# Instructions (may contain sensitive info)
-instructions.md
 EOF
     
     print_success ".gitignore created"
@@ -118,7 +112,7 @@ create_state_yaml() {
     print_info "Initializing plans/state.yaml..."
     
     cat > "$COPILOT_DIR/plans/state.yaml" << EOF
-# Planning Copilot - State File
+# Smart Agent - Plans State File
 # This file tracks all plans and their statuses
 
 version: 1
@@ -126,7 +120,6 @@ last_updated: "$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
 
 plans: {}
 
-# Quick reference counts
 summary:
   draft: 0
   pending_review: 0
@@ -140,49 +133,112 @@ EOF
     print_success "state.yaml initialized"
 }
 
-create_memory_state_yaml() {
-    print_info "Initializing memory/state.yaml..."
+create_docs_index() {
+    print_info "Initializing docs/index.yaml..."
     
-    cat > "$COPILOT_DIR/memory/state.yaml" << EOF
-# Planning Copilot - Memory State File
-# This file indexes all saved memories for quick lookup
+    cat > "$COPILOT_DIR/docs/index.yaml" << EOF
+# Smart Agent - Documentation Search Index
+# ALWAYS read this file first - it's your navigation map!
 
 version: 1
 last_updated: "$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
 
-# Saved memories
-memories: {}
+project:
+  name: null
+  type: null
+  primary_language: null
+  framework: null
+  stage: development
 
-# Quick lookup by tags
-tags_index: {}
+documents:
+  overview:
+    file: "overview.md"
+    title: "Project Overview"
+    summary: null
+    keywords: [purpose, quick-start, getting-started, about, features]
+    last_updated: null
+    
+  architecture:
+    file: "architecture.md"
+    title: "System Architecture"
+    summary: null
+    keywords: [layers, structure, modules, data-flow, directories, components]
+    last_updated: null
+    
+  tech-stack:
+    file: "tech-stack.md"
+    title: "Technology Stack"
+    summary: null
+    keywords: [dependencies, frameworks, libraries, versions, runtime, database]
+    last_updated: null
+    
+  api:
+    file: "api.md"
+    title: "API Documentation"
+    summary: null
+    keywords: [endpoints, routes, rest, http, requests]
+    has_api: false
+    last_updated: null
+    
+  testing:
+    file: "testing.md"
+    title: "Testing Strategy"
+    summary: null
+    keywords: [tests, coverage, unit, integration, commands]
+    last_updated: null
+    
+  development:
+    file: "development.md"
+    title: "Development Guide"
+    summary: null
+    keywords: [setup, install, scripts, env, commands, run, build]
+    last_updated: null
+    
+  conventions:
+    file: "conventions.md"
+    title: "Code Conventions"
+    summary: null
+    keywords: [style, naming, patterns, linting, formatting, git]
+    last_updated: null
+
+decisions:
+  count: 0
+  recent: []
+
+cross_references: {}
+
+quick_commands:
+  dev: null
+  build: null
+  test: null
+  lint: null
 EOF
     
-    print_success "memory/state.yaml initialized"
+    print_success "docs/index.yaml initialized"
 }
 
-create_decisions_state_yaml() {
-    print_info "Initializing decisions/state.yaml..."
+create_docs_decisions_index() {
+    print_info "Initializing docs/decisions/index.yaml..."
     
-    cat > "$COPILOT_DIR/decisions/state.yaml" << EOF
-# Planning Copilot - Design Decisions State File
-# This file indexes all design decisions for quick lookup
+    cat > "$COPILOT_DIR/docs/decisions/index.yaml" << EOF
+# Smart Agent - Decision Index
 
 version: 1
 last_updated: "$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+next_id: 1
 
 decisions: {}
 
-# Index by category for quick lookup
-categories:
+by_category:
   architecture: []
-  patterns: []
-  dependencies: []
-  testing: []
-  performance: []
+  api: []
   security: []
+  testing: []
   infrastructure: []
+  dependencies: []
+  patterns: []
+  other: []
 
-# Index by status
 by_status:
   proposed: []
   accepted: []
@@ -197,166 +253,23 @@ summary:
   superseded: 0
 EOF
     
-    print_success "decisions/state.yaml initialized"
+    print_success "docs/decisions/index.yaml initialized"
 }
 
-create_testing_state_yaml() {
-    print_info "Initializing testing/state.yaml..."
+install_smart_agent() {
+    print_info "Installing smart agent to .github/agents/..."
     
-    cat > "$COPILOT_DIR/testing/state.yaml" << 'EOF'
-# Planning Copilot - Testing State File
-# This file provides a comprehensive overview of the project's testing strategy
-
-version: 1
-last_updated: "YYYY-MM-DDTHH:MM:SSZ"
-
-testing_framework:
-  primary: null  # jest | vitest | pytest | cargo-test | go-test | etc.
-  secondary: []
-  coverage_tool: null
-  e2e_tool: null
-
-structure:
-  unit_tests:
-    location: null
-    pattern: null
-    count: 0
-  integration_tests:
-    location: null
-    pattern: null
-    count: 0
-  e2e_tests:
-    location: null
-    pattern: null
-    count: 0
-
-coverage:
-  target_percentage: 80
-  current_percentage: null
-  last_measured: null
-  excluded_paths: []
-
-commands:
-  run_all: null
-  run_unit: null
-  run_integration: null
-  run_e2e: null
-  run_coverage: null
-  run_watch: null
-
-project:
-  run_dev: null
-  run_build: null
-  run_start: null
-  run_lint: null
-  run_format: null
-  package_manager: null
-  runtime: null
-  version_file: null
-
-conventions:
-  naming: null
-  mocking_strategy: null
-  fixtures_location: null
-  factories_location: null
-
-gaps: []
-
-ci:
-  runs_tests: false
-  test_matrix: []
-  required_for_merge: false
-
-notes: null
-EOF
-    
-    print_success "testing/state.yaml initialized"
-}
-
-create_context_state_yaml() {
-    print_info "Initializing context/state.yaml..."
-    
-    cat > "$COPILOT_DIR/context/state.yaml" << 'EOF'
-# Planning Copilot - Project Context State File
-# This file provides deep understanding of the project beyond the basic summary
-
-version: 1
-last_updated: "YYYY-MM-DDTHH:MM:SSZ"
-
-project:
-  name: null
-  description: null
-  purpose: null
-  domain: null
-  stage: null
-
-architecture:
-  style: null
-  patterns: []
-  diagram_file: null
-
-stack:
-  languages:
-    primary: null
-    secondary: []
-  frameworks: []
-  databases: []
-  caching: []
-  messaging: []
-  cloud_provider: null
-
-modules: []
-
-integrations: []
-
-data_flow:
-  entry_points: []
-  data_stores: []
-  event_sources: []
-  event_consumers: []
-
-environments:
-  development:
-    config_file: null
-    special_setup: null
-  staging:
-    config_file: null
-    special_setup: null
-  production:
-    config_file: null
-    special_setup: null
-
-critical_paths: []
-
-constraints:
-  technical: []
-  business: []
-  regulatory: []
-
-conventions:
-  branching_strategy: null
-  commit_format: null
-  pr_requirements: null
-  code_review_required: null
-EOF
-    
-    print_success "context/state.yaml initialized"
-}
-
-install_planning_agent() {
-    print_info "Installing planning agent to .github/agents/..."
-    
-    # Download or copy the planning agent
+    # Download or copy the smart agent
     if command -v curl &> /dev/null; then
-        curl -sSL "$REPO_URL/agents/planning.agent.md" -o "$GITHUB_DIR/agents/planning.agent.md" 2>/dev/null || {
+        curl -sSL "$REPO_URL/agents/smart.agent.md" -o "$GITHUB_DIR/agents/smart.agent.md" 2>/dev/null || {
             print_warning "Could not download from remote, creating local copy..."
-            create_planning_agent_local
+            create_smart_agent_local
         }
     else
-        create_planning_agent_local
+        create_smart_agent_local
     fi
     
-    print_success "Planning agent installed"
+    print_success "Smart agent installed"
 }
 
 install_copilot_instructions() {
@@ -381,406 +294,175 @@ create_copilot_instructions_local() {
 
 ## Default Agent Mode
 
-When starting a new chat session or when no specific agent is selected, **automatically load the Planning Agent** (`@planning`).
+When starting a new chat session or when no specific agent is selected, **automatically load the Smart Agent** (`@smart`).
 
-The Planning Agent ensures all code changes are planned, tracked, and explicitly approved before implementation.
+The Smart Agent ensures all code changes are planned, tracked, and explicitly approved before implementation, with documentation maintained in the `.copilot/docs/` folder.
 
 ## Agent Loading Priority
 
 1. If user explicitly selects an agent → Use that agent
-2. If no agent selected → Load `@planning` agent automatically
+2. If no agent selected → Load `@smart` agent automatically
 3. Always check `.github/agents/` for available custom agents
 
 ## Available Agents
 
-### @planning (Default)
-- **Purpose**: Plan, track, and implement code changes with user approval
-- **Location**: `.github/agents/planning.agent.md`
+### @smart (Default)
+- **Purpose**: Plan, track, implement code changes with docs-first approach
+- **Location**: `.github/agents/smart.agent.md`
 - **When to use**: Any task that involves code modifications
 
 ## Required Behavior
 
 ### Always On First Interaction:
-1. Check if `.copilot/project_summary.md` exists
-   - If NOT: Analyze project structure and create it
-2. Read `.copilot/instructions.md` for project-specific rules
+1. Load `.copilot/docs/index.yaml` search index (PRIMARY CONTEXT)
+2. Navigate to relevant docs based on index keywords
 3. Check `.copilot/plans/state.yaml` for pending plans
 
 ### Never:
 - Implement code changes without explicit user approval
 - Skip the planning phase for significant changes
-- Ignore the state tracking in `.copilot/plans/`
+- Ignore the documentation in `.copilot/docs/`
 
 ## Project Configuration
 
-- **Plans Location**: `.copilot/plans/`
-- **State File**: `.copilot/plans/state.yaml`
+- **Documentation**: `.copilot/docs/` (single source of truth)
+- **Search Index**: `.copilot/docs/index.yaml`
+- **Plans**: `.copilot/plans/`
 - **Standards**: `.copilot/standards/` (if installed)
-- **Instructions**: `.copilot/instructions.md`
 
 ## Workflow Summary
 
 ```
-User Request → Create Plan → User Review → User Approval → Implementation
+User Request → Load Index → Read Docs → Create Plan → Approval → Implement → Update Docs
 ```
 
-Every plan must go through `pending_review` state before any code is written.
+After every completed request, documentation must be updated to reflect changes.
 INSTRUCTIONS_EOF
 }
 
-create_planning_agent_local() {
-    cat > "$GITHUB_DIR/agents/planning.agent.md" << 'AGENT_EOF'
+create_smart_agent_local() {
+    cat > "$GITHUB_DIR/agents/smart.agent.md" << 'AGENT_EOF'
 ---
-description: Plan, track, and implement code changes with explicit user approval at every stage.
-name: Planning
+description: Docs-first agent that plans, tracks, and implements code changes with search-indexed documentation.
+name: Smart
 tools: ['fetch', 'githubRepo', 'search', 'usages']
 handoffs:
+  - label: Setup Project
+    agent: agent
+    prompt: "Initialize or update the project documentation. Run the setup prompt at .copilot/prompts/setup-project.md to analyze the codebase and populate .copilot/docs/ with comprehensive documentation."
+    send: false
+  - label: Rebuild Search Index
+    agent: agent
+    prompt: "Rebuild the search index. Re-scan all documentation in .copilot/docs/ and regenerate .copilot/docs/index.yaml with updated summaries, keywords, and cross-references."
+    send: false
   - label: Implement Approved Plan
     agent: agent
-    prompt: "Implement the approved plan. Check .copilot/plans/state.yaml for the most recently approved plan and implement it following the steps outlined in the plan file."
+    prompt: "Implement the approved plan. Check .copilot/plans/state.yaml for the most recently approved plan and implement it. After completion, update relevant docs."
     send: false
   - label: Show Plan Status
     agent: agent
-    prompt: "Show the current implementation plan status. Read .copilot/plans/state.yaml and show: (1) Current in-progress plan with ID, title, status, and steps completed vs remaining, (2) All plans pending review with brief summaries, (3) Last 3 completed plans, (4) Summary counts by status. Format as a clear status dashboard."
-    send: true
-  - label: List All Plans
-    agent: agent
-    prompt: "Read .copilot/plans/state.yaml and list ALL plans with their ID, title, status, created date, and last updated date. Format as a table."
+    prompt: "Show current implementation plan status from .copilot/plans/state.yaml as a dashboard."
     send: true
 ---
 
-# Planning Agent
+# Smart Agent
 
-You are a **Planning Agent** for GitHub Copilot. Your role is to help users plan, track, and implement changes in their codebase following a structured workflow with explicit user approval at each stage.
+You are a **Smart Agent** for GitHub Copilot with a documentation-first approach.
 
-## Core Principles
+## Core Principle: Documentation as Context
 
-1. **Never implement without approval** - Always wait for explicit user confirmation before making any code changes
-2. **Document everything** - Keep plans, decisions, and progress tracked in `.copilot/plans/`
-3. **Follow standards** - Apply language-specific best practices from `.copilot/standards/`
-4. **Maintain state** - Track all plans in `.copilot/plans/state.yaml`
-5. **Offer options for complex changes** - When a request involves complex code changes, present multiple implementation options
+Your primary context source is `.copilot/docs/` with `index.yaml` as your navigation map.
 
 ---
 
-## Handling User Requests
+## Step 0: Load Search Index (ALWAYS FIRST!)
 
-### Evaluating Request Complexity
-
-When a user makes a request, first evaluate its complexity:
-
-| Complexity | Criteria | Action |
-|------------|----------|--------|
-| **Simple** | Single file change, clear implementation, no architectural decisions | Can implement directly after brief confirmation |
-| **Moderate** | Multiple files, straightforward approach, minimal risk | Create a single plan with clear steps |
-| **Complex** | Architectural decisions, multiple valid approaches, significant refactoring, new features | Create a plan with **multiple options** |
-
-### Complex Request Handling
-
-**For complex requests, ALWAYS:**
-
-1. **Analyze the request** and identify key decision points
-2. **Research the codebase** to understand existing patterns and constraints
-3. **Generate 2-3 implementation options** with trade-offs
-4. **Present options to user** before creating the final plan
-
----
-
-## Initialization Workflow
-
-**On every execution, perform these checks:**
-
-### Step 0: Check Memory (FIRST!)
 ```
-ALWAYS read .copilot/memory/state.yaml FIRST if it exists
-  - This is your PRIMARY source of information
-  - Contains saved context, decisions, and important findings
-  - Check here BEFORE searching the codebase or asking questions
-  - Use saved memories to provide consistent, informed responses
-```
-
-### Step 1: Check Project Summary
-```
-IF .copilot/project_summary.md does NOT exist:
-  1. Analyze the project structure (folders, files, package files)
-  2. Identify languages, frameworks, and dependencies
-  3. Create .copilot/project_summary.md with findings
-  4. Inform user about the analysis
-```
-
-### Step 2: Load Instructions
-```
-ALWAYS read .copilot/instructions.md if it exists
-  - This file contains user-specific instructions
-  - These instructions override default behaviors
-  - Apply any custom rules or preferences found
-```
-
-### Step 3: Check GitHub Instructions
-```
-IF .github folder exists:
-  - Look for: .github/copilot-instructions.md
-  - Look for: .github/prompts/*.md
-  - Look for: .github/agents/*.md
-  - Document findings in .copilot/instructions.md
+ON EVERY EXECUTION:
+1. Read .copilot/docs/index.yaml
+2. This index contains:
+   - Project identity and quick reference
+   - Document summaries with keywords
+   - Cross-references between docs
+3. Use keywords to navigate to relevant docs
+4. ONLY read full docs when keywords match the task
 ```
 
 ---
 
-## Directory Structure
-
-The agent uses the following structure in the target project:
+## Documentation Structure
 
 ```
 .copilot/
-├── project_summary.md     # Auto-generated project analysis
-├── instructions.md        # User instructions + GitHub config analysis
-├── standards/             # Language-specific best practices (optional)
-│   ├── rust.md
-│   └── nodejs.md
-├── memory/                # Persistent memory storage
-│   ├── state.yaml         # Index of all saved memories
-│   └── *.md               # Individual memory files
+├── docs/
+│   ├── index.yaml          # Search index (load first!)
+│   ├── overview.md         # Project overview and identity
+│   ├── architecture.md     # System design and components
+│   ├── tech-stack.md       # Languages, frameworks, dependencies
+│   ├── api.md              # API endpoints and contracts
+│   ├── testing.md          # Testing strategy and commands
+│   ├── development.md      # Dev workflow and commands
+│   ├── conventions.md      # Code style and patterns
+│   └── decisions/
+│       ├── index.yaml      # Decision log
+│       └── ADR-XXX.md      # Individual decisions
 ├── plans/
-│   ├── state.yaml         # Tracks all plans and their status
-│   ├── PLAN-001.md        # Individual plan files
-│   ├── PLAN-002.md
-│   └── ...
-└── tmp/                   # Temporary files (gitignored)
+│   └── state.yaml          # Plan tracking
+└── standards/              # Language guidelines (optional)
 ```
 
 ---
 
-## Plan Lifecycle
+## Workflow
 
-### Plan States
+### For Any Task:
+
+1. **Load Index** → Read `index.yaml` keywords
+2. **Find Docs** → Navigate to docs matching task keywords
+3. **Understand** → Read only relevant sections
+4. **Plan** → Create plan if needed
+5. **Implement** → Execute after approval
+6. **Update Docs** → Reflect changes in documentation
+
+### Post-Completion (MANDATORY):
+
+After completing ANY request that changes the codebase:
+1. Update affected documentation files
+2. Update `index.yaml` keywords if new concepts added
+3. Add ADR if architectural decision was made
+
+---
+
+## Plan States
 
 | State | Description |
 |-------|-------------|
-| `draft` | Plan is being created, not ready for review |
-| `pending_review` | Plan is ready and waiting for user approval |
-| `approved` | User approved the plan, ready for implementation |
-| `in_progress` | Currently being implemented |
-| `completed` | Successfully implemented |
-| `archived` | Completed and archived for reference |
-| `rejected` | User rejected the plan |
-
-### Workflow
-
-```
-1. USER REQUEST → Create plan (draft)
-2. DRAFT → Complete plan → Move to (pending_review)
-3. PENDING_REVIEW → Present to user for approval
-4. USER APPROVES → Move to (approved)
-5. APPROVED → Begin implementation → Move to (in_progress)
-6. IN_PROGRESS → Complete work → Move to (completed)
-7. COMPLETED → Archive when appropriate → Move to (archived)
-```
-
----
-
-## Plan Format
-
-Each plan file (e.g., `PLAN-001.md`) should follow this structure:
-
-```markdown
-# Plan: [Title]
-
-## Metadata
-- **ID**: PLAN-XXX
-- **Created**: YYYY-MM-DD
-- **Status**: [draft|pending_review|approved|in_progress|completed|archived|rejected]
-- **Author**: [user/agent]
-
-## Summary
-Brief description of what this plan aims to achieve.
-
-## Goals
-- [ ] Goal 1
-- [ ] Goal 2
-- [ ] Goal 3
-
-## Technical Approach
-Detailed technical description of how the goals will be achieved.
-
-## Files to Modify
-| File | Action | Description |
-|------|--------|-------------|
-| path/to/file.rs | create | New module for X |
-| path/to/other.ts | modify | Add function Y |
-
-## Implementation Steps
-1. Step 1 description
-2. Step 2 description
-3. Step 3 description
-
-## Risks and Considerations
-- Risk 1
-- Consideration 2
-
-## User Approval
-- [ ] User has reviewed this plan
-- [ ] User has approved implementation
-
-### Approval Notes
-(User comments will be added here)
-
-## Implementation Log
-| Date | Action | Notes |
-|------|--------|-------|
-| | | |
-```
-
----
-
-## State File Format
-
-The `.copilot/plans/state.yaml` file tracks all plans:
-
-```yaml
-version: 1
-last_updated: "YYYY-MM-DDTHH:MM:SSZ"
-
-plans:
-  PLAN-001:
-    title: "Feature X implementation"
-    status: completed
-    created: "2024-01-15"
-    updated: "2024-01-20"
-    
-  PLAN-002:
-    title: "Refactor module Y"
-    status: pending_review
-    created: "2024-01-18"
-    updated: "2024-01-18"
-
-# Quick reference counts
-summary:
-  draft: 0
-  pending_review: 1
-  approved: 0
-  in_progress: 0
-  completed: 1
-  archived: 0
-  rejected: 0
-```
+| `draft` | Being created |
+| `pending_review` | Ready for approval |
+| `approved` | Ready to implement |
+| `in_progress` | Being implemented |
+| `completed` | Done |
 
 ---
 
 ## Commands
 
-When interacting with users, respond to these commands:
-
 | Command | Action |
 |---------|--------|
-| `plan new <description>` | Create a new plan |
-| `plan list` | Show all plans and their statuses |
-| `plan show <ID>` | Display a specific plan |
-| `plan approve <ID>` | Mark a plan as approved (requires user confirmation) |
-| `plan reject <ID>` | Mark a plan as rejected |
-| `plan implement <ID>` | Start implementing an approved plan |
-| `plan archive <ID>` | Archive a completed plan |
-| `plan status` | Show summary of all plans by status |
+| `plan new <desc>` | Create plan |
+| `plan approve <ID>` | Approve plan |
+| `plan implement <ID>` | Start implementation |
+| `docs update` | Update documentation |
+| `docs rebuild` | Rebuild search index |
 
 ---
 
-## Standards Integration
+## Critical Rules
 
-When creating plans or implementing changes:
-
-1. **Check for standards**: Look in `.copilot/standards/` for language-specific guidelines
-2. **Apply best practices**: Follow the patterns and conventions defined in standards files
-3. **Reference in plans**: When suggesting code, reference which standard is being followed
-
-### Standards Location
-- `.copilot/standards/rust.md` - Rust best practices
-- `.copilot/standards/nodejs.md` - Node.js best practices
-- Additional standards can be added for other languages
-
----
-
-## User Interaction Guidelines
-
-### Before Any Implementation
-
-**ALWAYS** ask for explicit approval with this format:
-
-```
-📋 **Plan Ready for Review**
-
-I've created a plan for [description]. 
-
-**Summary:**
-[Brief summary of changes]
-
-**Files affected:**
-- file1.rs (create)
-- file2.ts (modify)
-
-⚠️ **Please review the full plan at:** `.copilot/plans/PLAN-XXX.md`
-
-**Do you approve this plan?** Reply with:
-- ✅ "approve" or "yes" to proceed with implementation
-- ❌ "reject" or "no" to cancel
-- 📝 "revise" with your feedback for changes
-```
-
-### After Approval
-
-```
-✅ **Plan Approved**
-
-Starting implementation of PLAN-XXX: [Title]
-
-I will update you as each step is completed.
-```
-
-### On Completion
-
-```
-🎉 **Implementation Complete**
-
-PLAN-XXX has been successfully implemented.
-
-**Changes made:**
-- [List of changes]
-
-**Next steps:**
-- Review the changes
-- Run tests
-- Let me know if any adjustments are needed
-
-This plan has been marked as `completed`. Would you like me to archive it?
-```
-
----
-
-## Error Handling
-
-- If `.copilot/` folder doesn't exist, create it with proper structure
-- If `state.yaml` is corrupted, backup and recreate
-- If a plan file is missing, update state.yaml to reflect this
-- Always inform user of any issues encountered
-
----
-
-## First Run Checklist
-
-On first run in a new project:
-
-1. [ ] Create `.copilot/` directory structure
-2. [ ] Create `.copilot/.gitignore`
-3. [ ] Analyze project and create `project_summary.md`
-4. [ ] Check `.github/` for existing instructions
-5. [ ] Create `instructions.md` with findings
-6. [ ] Initialize `plans/state.yaml`
-7. [ ] Inform user of setup completion
-
----
-
-## Remember
-
-🚨 **CRITICAL**: Never proceed with code changes without explicit user approval. The planning workflow exists to give users full control over what changes are made to their codebase.
+🚨 **ALWAYS** load `index.yaml` first
+🚨 **NEVER** implement without approval
+🚨 **ALWAYS** update docs after changes
+🚨 **NEVER** duplicate information across docs
 AGENT_EOF
 }
 
@@ -827,20 +509,29 @@ install_prompts() {
             print_warning "Could not download setup-project.md from remote"
             create_setup_prompt_local
         }
+        curl -sSL "$REPO_URL/templates/prompts/code-audit.md" -o "$COPILOT_DIR/prompts/code-audit.md" 2>/dev/null || {
+            print_warning "Could not download code-audit.md from remote"
+            create_code_audit_prompt_local
+        }
     else
         create_setup_prompt_local
+        create_code_audit_prompt_local
     fi
     
     if [ -f "$COPILOT_DIR/prompts/setup-project.md" ]; then
         print_success "Setup project prompt installed"
     fi
+    
+    if [ -f "$COPILOT_DIR/prompts/code-audit.md" ]; then
+        print_success "Code audit prompt installed"
+    fi
 }
 
 create_setup_prompt_local() {
     cat > "$COPILOT_DIR/prompts/setup-project.md" << 'PROMPT_EOF'
-# Setup Project Context
+# Setup Project Documentation
 
-Execute this prompt to fully initialize or update the Planning Copilot context for this project.
+Execute this prompt to fully initialize or update the Smart Agent documentation for this project.
 
 ## Instructions
 
@@ -851,80 +542,85 @@ Perform ALL of the following steps in order. Do not skip any steps.
 ## Step 1: Analyze Project Structure
 
 Scan the entire project and identify:
-- Root directory structure
+- Root directory structure and key folders
 - All programming languages used (by file extension and content)
 - Package/dependency files (package.json, Cargo.toml, pyproject.toml, go.mod, etc.)
 - Configuration files (.env.example, config files, etc.)
 - Build/bundler configuration (webpack, vite, tsconfig, etc.)
 - CI/CD configuration (.github/workflows, .gitlab-ci.yml, etc.)
+- Existing documentation (README.md, docs/, etc.)
 
 ---
 
-## Step 2: Create/Update Project Summary
+## Step 2: Create/Update Documentation Files
 
-Create or update `.copilot/project_summary.md` with:
+### 2.1: Overview (docs/overview.md)
+- Project name, description, purpose
+- Key features and capabilities
+- Quick start instructions
 
-- Project Identity (name, description, version, license)
-- Tech Stack (languages, frameworks, runtime, tools)
-- Project Structure (directory tree)
-- Entry Points
-- Scripts/Commands
-- Environment Variables
-- External Integrations
+### 2.2: Architecture (docs/architecture.md)
+- System components and their relationships
+- Data flow diagrams (text-based)
+- Key design patterns used
 
----
+### 2.3: Tech Stack (docs/tech-stack.md)
+- Languages with versions
+- Frameworks and libraries
+- Development tools
+- All dependencies from package files
 
-## Step 3: Create/Update Instructions
+### 2.4: API Documentation (docs/api.md)
+- Endpoints (if web service)
+- Public interfaces
+- Data models/schemas
 
-Create or update `.copilot/instructions.md` with:
+### 2.5: Testing (docs/testing.md)
+- Test framework and tools
+- Test file locations
+- Test commands
+- Coverage requirements
 
-- GitHub Configuration (copilot-instructions, prompts, agents found)
-- Standards Applied (based on detected tech stack)
-- Project-Specific Rules (from code patterns)
-- Detected Conventions (commit format, branch naming, PR requirements)
+### 2.6: Development (docs/development.md)
+- Setup instructions
+- Build commands
+- Run commands
+- Environment variables
 
----
-
-## Step 4: Setup Context Directory
-
-- Create/Update `.copilot/context/state.yaml` with project identity and architecture
-- Create/Update `.copilot/context/architecture.md` with system diagram
-- Create/Update `.copilot/context/codebase-map.md` with navigation guide
-- Create/Update `.copilot/context/dependencies.md` with all dependencies
-
----
-
-## Step 5: Setup Testing Directory
-
-- Create/Update `.copilot/testing/state.yaml` with detected testing framework
-- Create/Update `.copilot/testing/strategy.md` with test locations and commands
-
----
-
-## Step 6: Initialize Decisions Directory
-
-Create `.copilot/decisions/state.yaml` if not exists.
+### 2.7: Conventions (docs/conventions.md)
+- Code style patterns found
+- Naming conventions
+- File organization patterns
+- Commit message format (if detectable)
 
 ---
 
-## Step 7: Initialize Memory Directory
+## Step 3: Build Search Index
 
-Create `.copilot/memory/state.yaml` if not exists.
+Update `.copilot/docs/index.yaml` with:
+- Project identity (name, type, primary language)
+- Document summaries (2-3 sentences each)
+- Keywords for each document
+- Cross-references between related docs
+- Quick commands for common operations
 
 ---
 
-## Step 8: Initialize Plans Directory
+## Step 4: Initialize Other Files
 
-Create `.copilot/plans/state.yaml` if not exists.
+- Create `.copilot/plans/state.yaml` if not exists
+- Create `.copilot/docs/decisions/index.yaml` if not exists
+- Update `.copilot/instructions.md` with any GitHub config found
 
 ---
 
-## Step 9: Report Summary
+## Step 5: Report Summary
 
 Provide a summary of:
 - Project name and tech stack
-- Files created/updated
-- Key findings and recommendations
+- Documentation files created/updated
+- Key findings about the codebase
+- Recommendations for improvement
 
 ---
 
@@ -932,9 +628,218 @@ Provide a summary of:
 
 1. **Use real data** - Do not use placeholder text. Analyze the actual codebase.
 2. **Be thorough** - Scan all relevant files, not just root level.
-3. **Detect patterns** - Look for coding conventions in existing code.
-4. **Document gaps** - Note missing tests, documentation, etc.
+3. **No duplication** - Each piece of information lives in ONE place.
+4. **Update index** - The search index must reflect all documentation.
 PROMPT_EOF
+}
+
+create_code_audit_prompt_local() {
+    cat > "$COPILOT_DIR/prompts/code-audit.md" << 'AUDIT_EOF'
+# Code Audit
+
+> Perform a comprehensive code audit based on installed best practices
+
+## Pre-Requisites Check (CRITICAL - DO THIS FIRST!)
+
+```
+CHECK if .copilot/standards/ directory exists AND contains at least one .md file
+
+IF no standards found:
+  ❌ STOP IMMEDIATELY
+  
+  Display:
+  "⛔ **Code Audit Cannot Proceed**
+  
+  No best practices standards found in `.copilot/standards/`.
+  
+  **To fix this:**
+  1. Run the Smart Agent installer with standards: `./install-with-standards.sh`
+  2. Or manually add standard files to `.copilot/standards/`
+  
+  Available standards:
+  - `general.md` - General coding best practices
+  - `nodejs.md` - Node.js/TypeScript specific
+  - `rust.md` - Rust specific
+  
+  Cannot audit code without defined standards to audit against."
+  
+  EXIT - Do not proceed with audit
+```
+
+## Audit Process
+
+### Step 1: Load Standards
+
+```
+Read ALL .md files from .copilot/standards/
+For each standard file:
+  - Extract the rules and guidelines
+  - Note the category (general, language-specific, framework-specific)
+  - Build a checklist of items to verify
+```
+
+### Step 2: Load Project Context
+
+```
+Read .copilot/docs/index.yaml
+From index, determine:
+  - Primary language(s)
+  - Framework(s) in use
+  - Project structure
+  - Key modules to audit
+
+Only load standards relevant to the project's tech stack
+```
+
+### Step 3: Scan Codebase
+
+```
+For each applicable standard category:
+  
+  1. SECURITY
+     - Check for hardcoded secrets/credentials
+     - Verify input validation patterns
+     - Check authentication/authorization implementations
+     - Look for SQL injection vulnerabilities
+     - Check for XSS vulnerabilities
+     
+  2. CODE QUALITY
+     - Verify naming conventions
+     - Check for code duplication
+     - Verify error handling patterns
+     - Check function/file length
+     - Verify comments and documentation
+     
+  3. ARCHITECTURE
+     - Verify layer separation
+     - Check dependency injection patterns
+     - Verify single responsibility principle
+     - Check for circular dependencies
+     
+  4. TESTING
+     - Check test coverage presence
+     - Verify test naming conventions
+     - Look for missing edge case tests
+     
+  5. PERFORMANCE
+     - Check for N+1 query patterns
+     - Verify async/await usage
+     - Look for memory leak patterns
+     - Check for unnecessary computations
+     
+  6. DEPENDENCIES
+     - Check for outdated packages
+     - Verify no unused dependencies
+     - Check for security vulnerabilities
+```
+
+### Step 4: Generate Report
+
+Create audit report at `.copilot/tmp/audit-report-[TIMESTAMP].md`:
+
+```markdown
+# Code Audit Report
+
+**Project:** [project name]
+**Date:** [current date]
+**Standards Applied:** [list of standard files used]
+
+## Summary
+
+| Category | Issues Found | Severity |
+|----------|--------------|----------|
+| Security | X | 🔴 Critical / 🟡 Warning |
+| Code Quality | X | 🟡 Warning / 🟢 Info |
+| Architecture | X | ... |
+| Testing | X | ... |
+| Performance | X | ... |
+| Dependencies | X | ... |
+
+**Total Issues:** X
+**Critical:** X | **Warning:** X | **Info:** X
+
+## Critical Issues (Fix Immediately)
+
+### [ISSUE-001] [Title]
+- **Category:** Security
+- **Severity:** 🔴 Critical
+- **Location:** `path/to/file.ts:LINE`
+- **Standard Violated:** [Reference to standard]
+- **Description:** [What's wrong]
+- **Recommendation:** [How to fix]
+- **Example Fix:**
+  \`\`\`typescript
+  // Before
+  [problematic code]
+  
+  // After
+  [fixed code]
+  \`\`\`
+
+## Warnings (Fix Soon)
+
+### [ISSUE-XXX] ...
+
+## Informational (Consider Fixing)
+
+### [ISSUE-XXX] ...
+
+## Passed Checks ✅
+
+- [List of standards that passed]
+
+## Recommendations
+
+### Immediate Actions
+1. [ ] Fix critical security issues
+2. [ ] ...
+
+### Short-term (This Sprint)
+1. [ ] Address warning-level issues
+2. [ ] ...
+
+### Long-term (Backlog)
+1. [ ] Consider refactoring suggestions
+2. [ ] ...
+
+---
+*Generated by Smart Agent Code Audit*
+*Standards version: [date of standards files]*
+```
+
+## Output Format
+
+After audit completes, display:
+
+```
+📊 **Code Audit Complete**
+
+**Standards Applied:** [count] files from `.copilot/standards/`
+
+**Results Summary:**
+- 🔴 Critical: X issues
+- 🟡 Warning: X issues  
+- 🟢 Info: X suggestions
+
+**Full Report:** `.copilot/tmp/audit-report-[TIMESTAMP].md`
+
+**Top Priority Actions:**
+1. [Most critical issue]
+2. [Second most critical]
+3. [Third most critical]
+
+Run `@smart` and ask to "fix audit issue [ISSUE-ID]" to address specific issues.
+```
+
+## Notes
+
+- Only audit files matching the project's primary languages
+- Skip `node_modules/`, `vendor/`, `dist/`, `build/`, `.git/`
+- Skip files in `.copilot/tmp/`
+- Focus on patterns, not style (leave style to linters)
+- Reference specific line numbers when possible
+- Provide actionable, copy-paste-ready fixes
+AUDIT_EOF
 }
 
 create_instructions_template() {
@@ -1028,11 +933,9 @@ main() {
     create_directory_structure
     create_gitignore
     create_state_yaml
-    create_memory_state_yaml
-    create_decisions_state_yaml
-    create_testing_state_yaml
-    create_context_state_yaml
-    install_planning_agent
+    create_docs_index
+    create_docs_decisions_index
+    install_smart_agent
     install_copilot_instructions
     install_prompts
     create_instructions_template
@@ -1047,15 +950,13 @@ main() {
     echo -e "${GREEN}═══════════════════════════════════════════════════════════════${NC}"
     echo ""
     echo "The following has been installed:"
-    echo "  • Planning agent:       .github/agents/planning.agent.md"
+    echo "  • Smart agent:          .github/agents/smart.agent.md"
     echo "  • Copilot instructions: .github/copilot-instructions.md"
     echo "  • Setup prompt:         .copilot/prompts/setup-project.md"
     echo "  • Copilot folder:       .copilot/"
+    echo "  • Documentation:        .copilot/docs/"
+    echo "  • Search index:         .copilot/docs/index.yaml"
     echo "  • Plans tracker:        .copilot/plans/state.yaml"
-    echo "  • Memory system:        .copilot/memory/state.yaml"
-    echo "  • Design decisions:     .copilot/decisions/state.yaml"
-    echo "  • Testing context:      .copilot/testing/state.yaml"
-    echo "  • Project context:      .copilot/context/state.yaml"
     
     if [ "$INSTALL_STANDARDS" = true ]; then
         echo "  • Standards:            .copilot/standards/"
@@ -1064,12 +965,12 @@ main() {
     echo ""
     echo "Next steps:"
     echo "  1. Review .copilot/instructions.md and add project-specific rules"
-    echo "  2. Use the @planning agent in GitHub Copilot to start planning"
-    echo "  3. Run 'Setup Project Context' handoff to auto-analyze your project"
-    echo "  4. The agent will populate testing, context, and decisions on first run"
+    echo "  2. Use the @smart agent in GitHub Copilot to start planning"
+    echo "  3. Run 'Setup Project' handoff to auto-analyze and document your project"
+    echo "  4. The agent will populate docs/ with comprehensive documentation"
     echo ""
     print_info "Note: .copilot/ contents are gitignored by default"
-    print_info "Tip: Use the 'Setup Project Context' handoff button to auto-configure!"
+    print_info "Tip: Use the 'Setup Project' handoff button to auto-configure!"
     echo ""
 }
 

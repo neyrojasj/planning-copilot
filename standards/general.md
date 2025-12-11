@@ -15,6 +15,168 @@ Code should fail immediately and clearly when something is wrong, rather than si
 - Debugging is easier when errors occur close to the source
 - Silent failures can cascade into larger, harder-to-diagnose issues
 
+### 2. SOLID Principles
+
+All code should strive to follow the SOLID principles for maintainable, scalable software:
+
+#### **S - Single Responsibility Principle (SRP)**
+A class/module should have only one reason to change.
+
+**❌ Bad:**
+```typescript
+class UserService {
+    createUser(data: UserData) { /* ... */ }
+    sendWelcomeEmail(user: User) { /* ... */ }  // Email is not user management
+    generatePDFReport(user: User) { /* ... */ } // Reporting is not user management
+}
+```
+
+**✅ Good:**
+```typescript
+class UserService {
+    createUser(data: UserData) { /* ... */ }
+}
+class EmailService {
+    sendWelcomeEmail(user: User) { /* ... */ }
+}
+class ReportService {
+    generatePDFReport(user: User) { /* ... */ }
+}
+```
+
+#### **O - Open/Closed Principle (OCP)**
+Software entities should be open for extension but closed for modification.
+
+**❌ Bad:**
+```typescript
+function calculateDiscount(customerType: string, amount: number): number {
+    if (customerType === "regular") return amount * 0.1;
+    if (customerType === "premium") return amount * 0.2;
+    if (customerType === "vip") return amount * 0.3;  // Must modify function for new types
+    return 0;
+}
+```
+
+**✅ Good:**
+```typescript
+interface DiscountStrategy {
+    calculate(amount: number): number;
+}
+
+class RegularDiscount implements DiscountStrategy {
+    calculate(amount: number) { return amount * 0.1; }
+}
+
+class PremiumDiscount implements DiscountStrategy {
+    calculate(amount: number) { return amount * 0.2; }
+}
+
+// New discount types can be added without modifying existing code
+```
+
+#### **L - Liskov Substitution Principle (LSP)**
+Subtypes must be substitutable for their base types without altering program correctness.
+
+**❌ Bad:**
+```typescript
+class Rectangle {
+    setWidth(w: number) { this.width = w; }
+    setHeight(h: number) { this.height = h; }
+}
+
+class Square extends Rectangle {
+    setWidth(w: number) { this.width = w; this.height = w; }  // Breaks expectations!
+    setHeight(h: number) { this.width = h; this.height = h; }
+}
+```
+
+**✅ Good:**
+```typescript
+interface Shape {
+    getArea(): number;
+}
+
+class Rectangle implements Shape {
+    constructor(private width: number, private height: number) {}
+    getArea() { return this.width * this.height; }
+}
+
+class Square implements Shape {
+    constructor(private side: number) {}
+    getArea() { return this.side * this.side; }
+}
+```
+
+#### **I - Interface Segregation Principle (ISP)**
+Clients should not be forced to depend on interfaces they don't use.
+
+**❌ Bad:**
+```typescript
+interface Worker {
+    work(): void;
+    eat(): void;
+    sleep(): void;
+}
+
+class Robot implements Worker {
+    work() { /* ... */ }
+    eat() { throw new Error("Robots don't eat"); }   // Forced to implement
+    sleep() { throw new Error("Robots don't sleep"); } // Forced to implement
+}
+```
+
+**✅ Good:**
+```typescript
+interface Workable { work(): void; }
+interface Eatable { eat(): void; }
+interface Sleepable { sleep(): void; }
+
+class Human implements Workable, Eatable, Sleepable {
+    work() { /* ... */ }
+    eat() { /* ... */ }
+    sleep() { /* ... */ }
+}
+
+class Robot implements Workable {
+    work() { /* ... */ }
+}
+```
+
+#### **D - Dependency Inversion Principle (DIP)**
+High-level modules should not depend on low-level modules. Both should depend on abstractions.
+
+**❌ Bad:**
+```typescript
+class MySQLDatabase {
+    save(data: any) { /* MySQL specific */ }
+}
+
+class UserRepository {
+    private db = new MySQLDatabase();  // Tightly coupled to MySQL
+    save(user: User) { this.db.save(user); }
+}
+```
+
+**✅ Good:**
+```typescript
+interface Database {
+    save(data: any): void;
+}
+
+class MySQLDatabase implements Database {
+    save(data: any) { /* MySQL specific */ }
+}
+
+class PostgresDatabase implements Database {
+    save(data: any) { /* Postgres specific */ }
+}
+
+class UserRepository {
+    constructor(private db: Database) {}  // Depends on abstraction
+    save(user: User) { this.db.save(user); }
+}
+```
+
 ---
 
 ## Environment Variables
@@ -314,6 +476,7 @@ logger.error("Failed to process user order", {
 
 When writing or reviewing code, verify:
 
+- [ ] **SOLID principles applied** - Single responsibility, proper abstractions, substitutable types
 - [ ] **No default environment variables** for required configuration
 - [ ] **No silent error swallowing** - all errors handled or propagated
 - [ ] **No wildcard patterns** hiding known enum/union cases

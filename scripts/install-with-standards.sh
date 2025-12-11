@@ -1,7 +1,7 @@
 #!/bin/bash
 # =============================================================================
-# Planning Copilot Installer - With Standards
-# Installs the planning agent WITH language standards (Rust, Node.js)
+# Smart Agent Installer - With Standards
+# Installs the Smart Agent WITH language standards (Rust, Node.js)
 # =============================================================================
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

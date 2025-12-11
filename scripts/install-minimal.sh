@@ -1,7 +1,7 @@
 #!/bin/bash
 # =============================================================================
-# Planning Copilot Installer - Minimal (No Standards)
-# Installs only the planning agent without language standards
+# Smart Agent Installer - Minimal (No Standards)
+# Installs only the Smart Agent without language standards
 # =============================================================================
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
