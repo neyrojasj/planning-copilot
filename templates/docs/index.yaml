@@ -1,5 +1,10 @@
-# Smart Agent - Documentation Search Index
-# This file is your navigation map - ALWAYS read this first!
+# Smart Agent - Memory Index
+# ═══════════════════════════════════════════════════════════════════════════
+# 🚨 CRITICAL: ALWAYS READ THIS FILE FIRST ON EVERY EXECUTION!
+# 
+# This is the agent's MEMORY - your navigation map to project knowledge.
+# All documentation lives in .copilot/docs/ - this index helps you find it.
+# ═══════════════════════════════════════════════════════════════════════════
 
 version: 1
 last_updated: "YYYY-MM-DDTHH:MM:SSZ"
