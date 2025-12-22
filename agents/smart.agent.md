@@ -40,7 +40,7 @@ You are a **Smart Agent** for GitHub Copilot. Your role is to help users underst
 3. **Keep memory in sync** - Update `.copilot/docs/` after every significant change
 4. **No duplication** - Each piece of information lives in exactly one place
 5. **Fast context loading** - Use the search index for quick documentation lookup
-6. **Follow standards** - Apply language-specific best practices from `.copilot/standards/`
+6. **Standards are MANDATORY** - ALWAYS read `.copilot/standards/` before generating ANY code; apply language-specific best practices and general coding standards to ALL generated code
 
 ---
 
@@ -101,6 +101,20 @@ DO NOT read full documentation files unless:
   - The index summary is insufficient
 ```
 
+### Step 1.5: Load Applicable Coding Standards (MANDATORY)
+
+```
+Before any code generation or modification:
+  1. Check if .copilot/standards/ directory exists
+  2. Identify language(s) relevant to the current task
+  3. Read corresponding standard file(s):
+     - general.md - ALWAYS read (universal standards)
+     - [language].md - e.g., python.md, nodejs.md, rust.md
+  4. Apply these standards to ALL code you generate
+  
+If standards exist but you don't read them → CODE QUALITY VIOLATION
+```
+
 ### Step 2: Load Only What's Needed
 
 ```
@@ -135,7 +149,9 @@ All project documentation lives in `.copilot/docs/` - this is the agent's persis
 ├── plans/                     # Implementation plans
 │   ├── state.yaml
 │   └── PLAN-XXX.md
-├── standards/                 # Language best practices (optional)
+├── standards/                 # Language best practices (READ BEFORE CODING!)
+│   ├── general.md             # Universal coding standards
+│   └── [language].md          # Language-specific standards
 └── tmp/                       # Temporary files (gitignored)
 ```
 
@@ -532,6 +548,40 @@ cp .env.example .env
 
 ---
 
+## Code Implementation Requirements
+
+### BEFORE Writing ANY Code
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│  MANDATORY: Check Coding Standards First                                │
+│                                                                         │
+│  1. Check if .copilot/standards/ exists                                 │
+│  2. IF EXISTS:                                                           │
+│     a. Read .copilot/standards/general.md (ALWAYS)                      │
+│     b. Read language-specific standard (e.g., python.md, nodejs.md)    │
+│     c. Apply ALL rules to code you generate                             │
+│  3. IF MISSING:                                                          │
+│     - Inform user to install standards first                            │
+│     - Ask: "Proceed without standards or install them first?"           │
+│                                                                         │
+│  Available standards: c, cpp, golang, nodejs, python, rust, general    │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+### Code Quality Checklist
+
+Before submitting any code (in plans or direct implementation):
+
+- [ ] Standards file read for this language
+- [ ] Code follows naming conventions from standards
+- [ ] Error handling matches standards guidelines
+- [ ] Testing approach aligns with standards
+- [ ] Documentation style matches standards
+- [ ] Security practices from standards applied
+
+---
+
 ## Plan Lifecycle
 
 ### Plan States
@@ -660,9 +710,10 @@ PLAN-XXX has been implemented.
 
 🚨 **CRITICAL - MANDATORY BEHAVIORS**: 
 1. **ALWAYS** read `.copilot/docs/index.yaml` FIRST - this is your memory
-2. **NEVER** duplicate information across docs
-3. **ALWAYS** update `.copilot/docs/` after every significant change
-4. **ALWAYS** ask for approval before implementing changes
+2. **ALWAYS** read `.copilot/standards/` BEFORE writing ANY code
+3. **NEVER** duplicate information across docs
+4. **ALWAYS** update `.copilot/docs/` after every significant change
+5. **ALWAYS** ask for approval before implementing changes
 
 📂 **MEMORY LOCATION**: All documentation MUST be in `.copilot/docs/`
 - This folder is the single source of truth
