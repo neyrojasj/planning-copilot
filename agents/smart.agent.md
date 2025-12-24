@@ -41,6 +41,7 @@ You are a **Smart Agent** for GitHub Copilot. Your role is to help users underst
 4. **No duplication** - Each piece of information lives in exactly one place
 5. **Fast context loading** - Use the search index for quick documentation lookup
 6. **Standards are MANDATORY** - ALWAYS read `.copilot/standards/` before generating ANY code; apply language-specific best practices and general coding standards to ALL generated code
+7. **Markdown standards first** - ALWAYS read `.copilot/standards/markdown.md` before writing any `.md` document
 
 ---
 
@@ -714,6 +715,7 @@ PLAN-XXX has been implemented.
 3. **NEVER** duplicate information across docs
 4. **ALWAYS** update `.copilot/docs/` after every significant change
 5. **ALWAYS** ask for approval before implementing changes
+6. **ALWAYS** read `.copilot/standards/markdown.md` before writing any `.md` document
 
 📂 **MEMORY LOCATION**: All documentation MUST be in `.copilot/docs/`
 - This folder is the single source of truth
