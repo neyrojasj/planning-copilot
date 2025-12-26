@@ -179,6 +179,412 @@ class UserRepository {
 
 ---
 
+## Clean Code Principles
+
+Based on Robert C. Martin's "Clean Code" and industry best practices.
+
+### 3. Meaningful Names
+
+Names should reveal intent and be unambiguous.
+
+**Rules:**
+- Use intention-revealing names
+- Avoid single-letter names (except `i`, `j`, `k` for loops)
+- Avoid abbreviations and encodings
+- Class names = nouns (`User`, `OrderProcessor`)
+- Method names = verbs (`getUser`, `processOrder`, `validateInput`)
+
+**❌ Bad:**
+```typescript
+const d = new Date(); // What is 'd'?
+const u = getU(id);   // What is 'u'? What does getU do?
+const list = getData(); // What data?
+
+function proc(x: any) { /* ... */ }
+```
+
+**✅ Good:**
+```typescript
+const currentDate = new Date();
+const user = getUserById(userId);
+const activeOrders = getActiveOrders();
+
+function processPayment(paymentDetails: PaymentDetails) { /* ... */ }
+```
+
+### 4. Boy Scout Rule
+
+> *"Always leave the code cleaner than you found it."* — Robert C. Martin
+
+When you touch code:
+- Fix minor issues you encounter
+- Improve unclear variable names
+- Extract long methods
+- Remove dead code
+
+**Don't:**
+- Make unrelated large refactors in the same commit
+- "Fix" things without understanding them
+
+### 5. Comments
+
+Comments should explain **why**, not **what**.
+
+**❌ Bad:**
+```typescript
+// Increment counter by 1
+counter++;
+
+// Get the user from database
+const user = userRepository.findById(id);
+
+// TODO: fix this later
+const result = hackyWorkaround();
+```
+
+**✅ Good:**
+```typescript
+// Counter tracks retry attempts for circuit breaker pattern
+counter++;
+
+// Bypass cache due to CAP theorem constraints in distributed system
+const user = userRepository.findByIdDirect(id);
+
+// Legal requirement: GDPR Article 17 mandates 30-day retention
+const retentionDays = 30;
+```
+
+### 6. Avoid Magic Numbers
+
+Replace hard-coded values with named constants.
+
+**❌ Bad:**
+```typescript
+if (password.length < 8) { /* ... */ }
+setTimeout(callback, 86400000);
+if (statusCode === 401) { /* ... */ }
+```
+
+**✅ Good:**
+```typescript
+const MIN_PASSWORD_LENGTH = 8;
+if (password.length < MIN_PASSWORD_LENGTH) { /* ... */ }
+
+const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+setTimeout(callback, ONE_DAY_MS);
+
+const HTTP_UNAUTHORIZED = 401;
+if (statusCode === HTTP_UNAUTHORIZED) { /* ... */ }
+```
+
+---
+
+## DRY, YAGNI, KISS
+
+Three fundamental principles for clean, maintainable code.
+
+### 7. DRY - Don't Repeat Yourself
+
+Every piece of knowledge should have a single, authoritative representation.
+
+**❌ Bad:**
+```typescript
+function validateUserEmail(email: string): boolean {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+}
+
+function validateOrderEmail(email: string): boolean {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Duplicated!
+    return emailRegex.test(email);
+}
+```
+
+**✅ Good:**
+```typescript
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+function isValidEmail(email: string): boolean {
+    return EMAIL_REGEX.test(email);
+}
+
+// Use isValidEmail everywhere
+```
+
+### 8. YAGNI - You Aren't Gonna Need It
+
+Don't implement functionality until you actually need it.
+
+**❌ Bad:**
+```typescript
+class UserService {
+    createUser(data: UserData) { /* ... */ }
+    
+    // "We might need these later"
+    createBulkUsers(data: UserData[]) { /* Never used */ }
+    migrateUserFromLegacy(legacyId: string) { /* Never used */ }
+    exportUserToCSV(userId: string) { /* Never used */ }
+}
+```
+
+**✅ Good:**
+```typescript
+class UserService {
+    createUser(data: UserData) { /* ... */ }
+    // Add other methods when actually needed
+}
+```
+
+### 9. KISS - Keep It Simple, Stupid
+
+Prefer simple solutions over clever ones.
+
+**❌ Bad:**
+```typescript
+// "Clever" one-liner that no one understands
+const result = arr.reduce((a,c)=>({...a,[c.id]:c}),{});
+```
+
+**✅ Good:**
+```typescript
+// Clear and readable
+const result: Record<string, Item> = {};
+for (const item of items) {
+    result[item.id] = item;
+}
+```
+
+---
+
+## Function Design
+
+Based on Clean Code principles for writing effective functions.
+
+### 10. Small Functions
+
+Functions should be small and do one thing well.
+
+**Guidelines:**
+- Aim for < 20 lines per function
+- Extract complex logic into well-named helper functions
+- If you need to scroll to see the whole function, it's too long
+
+**❌ Bad:**
+```typescript
+function processOrder(order: Order): ProcessedOrder {
+    // 200 lines of validation, calculation, 
+    // database operations, email sending...
+}
+```
+
+**✅ Good:**
+```typescript
+function processOrder(order: Order): ProcessedOrder {
+    validateOrder(order);
+    const pricing = calculatePricing(order);
+    const savedOrder = saveOrder(order, pricing);
+    notifyCustomer(savedOrder);
+    return savedOrder;
+}
+```
+
+### 11. Few Arguments
+
+Prefer fewer function arguments (ideally 0-3).
+
+**❌ Bad:**
+```typescript
+function createUser(
+    name: string,
+    email: string,
+    age: number,
+    address: string,
+    phone: string,
+    role: string
+) { /* ... */ }
+```
+
+**✅ Good:**
+```typescript
+interface CreateUserRequest {
+    name: string;
+    email: string;
+    age: number;
+    address: string;
+    phone: string;
+    role: string;
+}
+
+function createUser(request: CreateUserRequest) { /* ... */ }
+```
+
+### 12. No Side Effects
+
+Functions should either do something (command) or answer something (query), not both.
+
+**❌ Bad:**
+```typescript
+function getUser(id: string): User {
+    const user = database.find(id);
+    user.lastAccessed = new Date(); // Side effect!
+    database.save(user);            // Side effect!
+    return user;
+}
+```
+
+**✅ Good:**
+```typescript
+function getUser(id: string): User {
+    return database.find(id);
+}
+
+function recordUserAccess(userId: string): void {
+    const user = database.find(userId);
+    user.lastAccessed = new Date();
+    database.save(user);
+}
+```
+
+---
+
+## Security Best Practices
+
+Essential security principles for all code.
+
+### 13. Input Validation
+
+Never trust external input. Validate at system boundaries.
+
+**❌ Bad:**
+```typescript
+app.post('/users', (req, res) => {
+    const user = createUser(req.body); // Direct use of input!
+    res.json(user);
+});
+```
+
+**✅ Good:**
+```typescript
+app.post('/users', (req, res) => {
+    const validated = userSchema.parse(req.body); // Validate first
+    const user = createUser(validated);
+    res.json(user);
+});
+```
+
+### 14. No Secrets in Code
+
+Never hardcode secrets, credentials, or API keys.
+
+**❌ Bad:**
+```typescript
+const apiKey = "sk-1234567890abcdef";
+const dbPassword = "super-secret-password";
+```
+
+**✅ Good:**
+```typescript
+const apiKey = process.env.API_KEY;
+if (!apiKey) {
+    throw new Error("API_KEY environment variable must be set");
+}
+```
+
+### 15. Principle of Least Privilege
+
+Grant minimum permissions necessary for functionality.
+
+**Rules:**
+- Request only needed permissions/scopes
+- Use read-only access when writes aren't needed
+- Limit database user permissions
+- Use scoped tokens with expiration
+
+### 16. Defense in Depth
+
+Don't rely on a single security layer.
+
+**Apply multiple protections:**
+- Input validation AND output encoding
+- Authentication AND authorization
+- Encryption in transit AND at rest
+- Application security AND infrastructure security
+
+---
+
+## Testing Principles
+
+### 17. FIRST Principles for Tests
+
+Tests should be:
+
+| Letter | Principle | Meaning |
+|--------|-----------|---------|
+| **F** | Fast | Tests should run quickly |
+| **I** | Independent | Tests should not depend on each other |
+| **R** | Repeatable | Same result every time, any environment |
+| **S** | Self-Validating | Pass or fail, no manual interpretation |
+| **T** | Timely | Written before or with the code |
+
+### 18. One Concept Per Test
+
+Each test should verify a single behavior.
+
+**❌ Bad:**
+```typescript
+test('user operations', () => {
+    const user = createUser({ name: 'John' });
+    expect(user.name).toBe('John');
+    
+    user.name = 'Jane';
+    expect(user.name).toBe('Jane');
+    
+    deleteUser(user.id);
+    expect(getUser(user.id)).toBeNull();
+});
+```
+
+**✅ Good:**
+```typescript
+test('createUser sets the provided name', () => {
+    const user = createUser({ name: 'John' });
+    expect(user.name).toBe('John');
+});
+
+test('user name can be updated', () => {
+    const user = createUser({ name: 'John' });
+    user.name = 'Jane';
+    expect(user.name).toBe('Jane');
+});
+
+test('deleteUser removes user from database', () => {
+    const user = createUser({ name: 'John' });
+    deleteUser(user.id);
+    expect(getUser(user.id)).toBeNull();
+});
+```
+
+### 19. Arrange-Act-Assert Pattern
+
+Structure tests clearly:
+
+```typescript
+test('calculateTotal applies discount correctly', () => {
+    // Arrange
+    const cart = new Cart();
+    cart.addItem({ price: 100 });
+    const discount = new PercentageDiscount(10);
+    
+    // Act
+    const total = cart.calculateTotal(discount);
+    
+    // Assert
+    expect(total).toBe(90);
+});
+```
+
+---
+
 ## Environment Variables
 
 ### ❌ FORBIDDEN: Default Values for Environment Variables
@@ -476,13 +882,46 @@ logger.error("Failed to process user order", {
 
 When writing or reviewing code, verify:
 
+### Core Principles
+
 - [ ] **SOLID principles applied** - Single responsibility, proper abstractions, substitutable types
-- [ ] **No default environment variables** for required configuration
-- [ ] **No silent error swallowing** - all errors handled or propagated
+- [ ] **Fail fast** - detect problems early, not in production
+
+### Clean Code
+
+- [ ] **Meaningful names** - Variables, functions, classes reveal intent
+- [ ] **Small functions** - < 20 lines, single responsibility
+- [ ] **No magic numbers** - Use named constants
+- [ ] **Comments explain why** - Not what the code does
+
+### DRY, YAGNI, KISS
+
+- [ ] **No duplication** - Single source of truth for each concept
+- [ ] **No speculative code** - Only implement what's needed now
+- [ ] **Simple over clever** - Prefer readable solutions
+
+### Error Handling
+
+- [ ] **No silent error swallowing** - All errors handled or propagated
 - [ ] **No wildcard patterns** hiding known enum/union cases
 - [ ] **No unsafe unwrapping** without explicit justification
 - [ ] **Error logs include context** - what, why, and relevant IDs
-- [ ] **Fail fast** - detect problems early, not in production
+
+### Configuration
+
+- [ ] **No default environment variables** for required configuration
+
+### Security
+
+- [ ] **Input validated** at system boundaries
+- [ ] **No secrets in code** - Use environment variables
+- [ ] **Least privilege** - Minimum permissions granted
+
+### Testing
+
+- [ ] **Tests follow FIRST** - Fast, Independent, Repeatable, Self-validating, Timely
+- [ ] **One concept per test** - Single behavior verification
+- [ ] **Arrange-Act-Assert** pattern used
 
 ---
 

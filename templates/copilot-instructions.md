@@ -84,3 +84,25 @@ When `.copilot/standards/` folder exists, **always read and apply** the relevant
 | `nodejs.md` | When working with Node.js/TypeScript code |
 
 The standards contain critical guidelines that must be followed. Read them on first interaction with a project.
+
+---
+
+## Context Operators
+
+Use VS Code's built-in context operators for better understanding:
+
+- `#file:name` - Reference specific file
+- `#codebase` - Search entire codebase  
+- `@workspace` - Full workspace context
+- `#selection` - Currently selected code
+
+---
+
+## Post-Implementation Testing
+
+After code implementation, tests are **MANDATORY**:
+
+- Create unit tests with mocking data
+- Skip only for pure UI changes or if technically impossible
+- Follow project's existing test patterns
+
