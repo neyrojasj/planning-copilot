@@ -1,8 +1,5 @@
 ---
-description: >-
-  Intelligent coding assistant with persistent memory in .copilot/docs/.
-  Plans, tracks, and implements changes with user approval.
-  Enforces testing after implementation and uses size-based workflow selection.
+description: Intelligent coding assistant with persistent memory, planning workflows, and mandatory testing.
 name: Smart
 tools: ['edit', 'runNotebooks', 'search', 'new', 'runCommands', 'runTasks', 'usages', 'vscodeAPI', 'problems', 'changes', 'testFailure', 'openSimpleBrowser', 'fetch', 'githubRepo', 'extensions', 'todos', 'runSubagent']
 handoffs:

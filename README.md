@@ -147,7 +147,8 @@ your-project/
     │   ├── state.yaml           # 📈 Plan tracking
     │   └── PLAN-XXX.md          # 📋 Individual plans
     ├── prompts/                 # 🎯 Setup prompts
-    │   └── setup-project.md     # Project setup prompt
+    │   ├── setup-project.md     # Project setup prompt
+    │   └── setup-rust-web-app.md # 🦀 Rust web app setup
     └── tmp/                     # 🗑️ Temporary files
 ```
 
