@@ -3,22 +3,14 @@ description: Intelligent coding assistant with persistent memory, planning workf
 name: Smart
 tools: ['edit', 'runNotebooks', 'search', 'new', 'runCommands', 'runTasks', 'usages', 'vscodeAPI', 'problems', 'changes', 'testFailure', 'openSimpleBrowser', 'fetch', 'githubRepo', 'extensions', 'todos', 'runSubagent']
 handoffs:
-  - label: 📋 Show Plan Status
+  - label: ▶️ Approved and implement Plan
     agent: Smart
-    prompt: "FIRST: Read .copilot/docs/index.yaml to load project context. THEN: Read .copilot/plans/state.yaml and display a clear status dashboard showing: (1) Current in-progress plan with ID, title, status, and steps completed vs remaining, (2) All plans pending review with brief summaries, (3) Last 3 completed plans, (4) Summary counts by status."
+    prompt: "The plan is approved, implement it. But, FIRST: Read .copilot/docs/index.yaml to understand the project. THEN: Check .copilot/plans/state.yaml. AFTER completion: Update relevant documentation in .copilot/docs/ to reflect the changes made."
     send: true
-  - label: 📝 List All Plans
-    agent: Smart
-    prompt: "FIRST: Read .copilot/docs/index.yaml to load project context. THEN: Read .copilot/plans/state.yaml and list ALL plans in a table format showing: ID, title, status, created date, and last updated date."
-    send: true
-  - label: ▶️ Implement Approved Plan
-    agent: Smart
-    prompt: "FIRST: Read .copilot/docs/index.yaml to understand the project. THEN: Check .copilot/plans/state.yaml for the most recently approved plan. Implement it following the steps in the plan file. AFTER completion: Update relevant documentation in .copilot/docs/ to reflect the changes made."
-    send: false
   - label: 🚀 Setup Project
     agent: Smart
     prompt: "Initialize project documentation (agent memory). Execute the setup prompt at .copilot/prompts/setup-project.md to: (1) Analyze the entire codebase, (2) Create/update all documentation files in .copilot/docs/, (3) Build the search index at .copilot/docs/index.yaml. If the prompt file doesn't exist, inform the user to reinstall Smart Agent."
-    send: false
+    send: true
   - label: 🔄 Rebuild Search Index
     agent: Smart
     prompt: "Rebuild the documentation search index (agent memory index). Read all files in .copilot/docs/ and regenerate .copilot/docs/index.yaml with updated: project info, document summaries, keywords for each doc, cross-references between related topics, and quick command references."
