@@ -157,7 +157,7 @@ create_directory_structure() {
 
 install_gitignore() {
     print_info "Installing .copilot/.gitignore..."
-    copy_file_from_repo "templates/.copilot-gitignore" "$COPILOT_DIR/.gitignore"
+    copy_file_from_repo "templates/copilot-gitignore.txt" "$COPILOT_DIR/.gitignore"
     print_success ".gitignore installed"
 }
 
