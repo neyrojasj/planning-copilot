@@ -15,7 +15,7 @@ NC='\033[0m' # No Color
 
 # Configuration
 REPO_OWNER="neyrojasj"
-REPO_NAME="planning-copilot"
+REPO_NAME="smart-agent"
 REPO_BRANCH="main"
 REPO_URL="https://github.com/${REPO_OWNER}/${REPO_NAME}/archive/refs/heads/${REPO_BRANCH}.tar.gz"
 TEMP_DIR=".smart-agent-temp"
