@@ -659,6 +659,100 @@ Before completing any implementation:
 
 ---
 
+## 🤔 Clarifying Questions Before Planning
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│  MANDATORY: Ask Questions to Understand Developer Intent                │
+│                                                                         │
+│  Before creating ANY plan, you MUST fully understand:                   │
+│                                                                         │
+│  • What EXACTLY the developer wants to achieve                          │
+│  • WHY they want this change (the underlying problem)                   │
+│  • What CONSTRAINTS or requirements exist                               │
+│  • What the EXPECTED BEHAVIOR should be                                 │
+│  • How this fits with EXISTING code/architecture                        │
+│                                                                         │
+│  ASK AS MANY QUESTIONS AS NEEDED to be 100% clear on the goal.          │
+│  It's better to ask 10 questions upfront than to build the wrong thing. │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+### When to Ask Questions
+
+**ALWAYS ask questions when:**
+- The request is ambiguous or high-level
+- Multiple interpretations are possible
+- Technical decisions need user input
+- The scope is unclear
+- You're uncertain about edge cases
+- The request conflicts with existing patterns
+
+**You can skip questions when:**
+- The request is crystal clear and specific
+- It's a simple bug fix with obvious solution
+- User has provided comprehensive context
+- It's a direct follow-up to a previous discussion
+
+### Question Categories
+
+| Category | Example Questions |
+|----------|-------------------|
+| **Scope** | "Should this include X? What about Y?" |
+| **Behavior** | "What should happen when Z occurs?" |
+| **Constraints** | "Are there performance/security requirements?" |
+| **Integration** | "How should this interact with existing feature A?" |
+| **Edge Cases** | "What if the user does X? What about empty input?" |
+| **Priority** | "Which aspects are must-have vs nice-to-have?" |
+| **Timeline** | "Is this urgent? Should I prioritize speed or quality?" |
+
+### Question Format
+
+```markdown
+🤔 **Before I create a plan, I have some questions:**
+
+1. **[Category]**: [Question]
+   - Option A: [possibility]
+   - Option B: [possibility]
+
+2. **[Category]**: [Question]
+
+3. **[Category]**: [Question]
+
+Please answer these so I can create an accurate plan that matches your vision.
+```
+
+### Example
+
+```markdown
+🤔 **Before I create a plan for "add user authentication", I have some questions:**
+
+1. **Authentication Method**: What type of authentication do you prefer?
+   - JWT tokens (stateless, good for APIs)
+   - Session-based (traditional, server-stored)
+   - OAuth providers (Google, GitHub, etc.)
+
+2. **Scope**: Should this include:
+   - [ ] User registration?
+   - [ ] Password reset?
+   - [ ] Email verification?
+   - [ ] Remember me functionality?
+
+3. **Security**: Any specific security requirements?
+   - Rate limiting on login attempts?
+   - 2FA support?
+   - Password complexity rules?
+
+4. **Integration**: How should authenticated routes be protected?
+   - Middleware on all routes?
+   - Per-route protection?
+   - Role-based access control?
+
+Please answer these so I can create an accurate plan.
+```
+
+---
+
 ## Plan Lifecycle
 
 ### Plan States
@@ -887,13 +981,14 @@ Which approach would you prefer?
 
 1. **ALWAYS** read `.copilot/docs/index.yaml` FIRST - this is your memory
 2. **ALWAYS** read `.copilot/standards/` BEFORE writing ANY code
-3. **NEVER** duplicate information across docs
-4. **ALWAYS** update `.copilot/docs/` after every significant change
-5. **ALWAYS** ask for approval before implementing changes
-6. **ALWAYS** read `.copilot/standards/markdown.md` before writing any `.md` document
-7. **ALWAYS** create tests with mocking data after implementing code
-8. **ALWAYS** use full planning workflow for changes >500 lines
-9. **ALWAYS** let the user decide when multiple solutions exist - present options with your best recommendation, but NEVER choose autonomously
+3. **ALWAYS** ask clarifying questions before creating plans when the request is ambiguous
+4. **NEVER** duplicate information across docs
+5. **ALWAYS** update `.copilot/docs/` after every significant change
+6. **ALWAYS** ask for approval before implementing changes
+7. **ALWAYS** read `.copilot/standards/markdown.md` before writing any `.md` document
+8. **ALWAYS** create tests with mocking data after implementing code
+9. **ALWAYS** use full planning workflow for changes >500 lines
+10. **ALWAYS** let the user decide when multiple solutions exist - present options with your best recommendation, but NEVER choose autonomously
 
 📂 **MEMORY LOCATION**: All documentation MUST be in `.copilot/docs/`
 

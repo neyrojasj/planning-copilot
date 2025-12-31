@@ -200,6 +200,7 @@ install_standards() {
     
     local standards=(
         "general.md:General programming standards"
+        "markdown.md:Markdown standards"
         "rust.md:Rust standards"
         "nodejs.md:Node.js standards"
         "c.md:C standards"
